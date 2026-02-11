@@ -83,17 +83,19 @@ export const CollectionView = ({
       const commentEvents = await getEventsByType(commentEventType);
 
       const seenComments = new Set<number>();
-      const uniqueComments = commentEvents.filter((e) => {
-        if (e.commentId == null || seenComments.has(e.commentId)) {
-          return false;
+      const uniqueComments = commentEvents.filter(
+        (e): e is UserEvent & { commentId: number } => {
+          if (e.commentId == null || seenComments.has(e.commentId)) {
+            return false;
+          }
+          seenComments.add(e.commentId);
+          return true;
         }
-        seenComments.add(e.commentId);
-        return true;
-      });
+      );
 
       setLikedComments(
         uniqueComments.map((e) => ({
-          commentId: e.commentId!,
+          commentId: e.commentId,
           commentUser: e.commentUser ?? "",
           commentContent: e.commentContent ?? "",
           commentTime: e.commentTime ?? 0,

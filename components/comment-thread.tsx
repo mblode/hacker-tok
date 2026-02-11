@@ -10,6 +10,8 @@ interface CommentThreadProps {
   postId: number;
   postUser: string;
   postTitle: string;
+  hasNextPost?: boolean;
+  onNextPost?: () => void;
 }
 
 const SKELETON_DELAY_MS = 200;
@@ -18,10 +20,25 @@ export const CommentThread = ({
   postId,
   postUser,
   postTitle,
+  hasNextPost = false,
+  onNextPost,
 }: CommentThreadProps) => {
-  const { comments, commentsCount, isLoading, error, retry } =
-    useComments(postId);
+  const { comments, isLoading, error, retry } = useComments(postId);
   const [showSkeleton, setShowSkeleton] = useState(false);
+
+  const renderNextPostCta = () => {
+    if (!(hasNextPost && onNextPost)) {
+      return null;
+    }
+
+    return (
+      <div className="mt-8 border-border border-t pt-6">
+        <Button className="h-12 w-full sm:w-auto" onClick={onNextPost}>
+          Next post
+        </Button>
+      </div>
+    );
+  };
 
   useEffect(() => {
     if (!isLoading) {
@@ -60,18 +77,24 @@ export const CommentThread = ({
 
   if (error) {
     return (
-      <div className="text-muted-foreground text-sm" role="alert">
-        {error}.{" "}
-        <Button onClick={retry} size="xs" variant="ghost">
-          Try again
-        </Button>
+      <div>
+        <div className="text-muted-foreground text-sm" role="alert">
+          {error}.{" "}
+          <Button onClick={retry} size="xs" variant="ghost">
+            Try again
+          </Button>
+        </div>
+        {renderNextPostCta()}
       </div>
     );
   }
 
   if (comments.length === 0) {
     return (
-      <div className="text-muted-foreground text-sm">No comments yet.</div>
+      <div>
+        <div className="text-muted-foreground text-sm">No comments yet.</div>
+        {renderNextPostCta()}
+      </div>
     );
   }
 
@@ -93,6 +116,7 @@ export const CommentThread = ({
           />
         ))}
       </ul>
+      {renderNextPostCta()}
     </>
   );
 };

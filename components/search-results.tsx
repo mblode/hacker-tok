@@ -33,6 +33,9 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
     useSearch({ query, sort, enabled: query.length > 0 });
 
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const previousSearchRef = useRef<{ query: string; sort: SearchSort } | null>(
+    null
+  );
   const [autoLoadCount, setAutoLoadCount] = useState(0);
   const showButton = autoLoadCount >= AUTO_LOAD_LIMIT;
 
@@ -50,7 +53,16 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
 
   // Reset auto-load counter when search changes
   useEffect(() => {
-    setAutoLoadCount(0);
+    const previous = previousSearchRef.current;
+    const hasChanged =
+      previous == null || previous.query !== query || previous.sort !== sort;
+
+    previousSearchRef.current = { query, sort };
+
+    if (hasChanged) {
+      setAutoLoadCount(0);
+      setSelectedIndex(null);
+    }
   }, [query, sort]);
 
   // Infinite scroll observer (disabled after AUTO_LOAD_LIMIT auto-loads)
@@ -112,11 +124,6 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
     params.set("q", q);
     router.push(`/search?${params.toString()}`);
   };
-
-  // Reset selection when query or sort changes
-  useEffect(() => {
-    setSelectedIndex(null);
-  }, [query, sort]);
 
   const searchOriginPath = `/search?${new URLSearchParams({
     q: query,

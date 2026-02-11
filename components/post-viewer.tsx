@@ -4,10 +4,19 @@ import {
   ArrowLeft,
   Bookmark,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   ChevronUp,
   Heart,
 } from "lucide-react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
 import { PostCard } from "@/components/post-card";
 import { Button } from "@/components/ui/button";
@@ -27,6 +36,17 @@ import type { CandidateStory, EventType } from "@/lib/types";
 
 const LOAD_MORE_THRESHOLD = 10;
 const MAX_BACKGROUND_PAGES = 4;
+const MOBILE_SLIDE_NAV_STYLE: CSSProperties = {
+  border: "1px solid rgba(255, 255, 255, 0.45)",
+  backdropFilter: "blur(20px)",
+  background:
+    "linear-gradient(90deg, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.44) 100%)",
+  borderRadius: "9999px",
+  boxShadow:
+    "rgba(32, 34, 55, 0.06) 0px 8px 12px -6px inset, rgba(32, 34, 55, 0.08) 0px 0px 0px 1px, rgba(32, 34, 55, 0.08) 0px 8px 16px -10px",
+  opacity: 1,
+  bottom: "calc(0.75rem + env(safe-area-inset-bottom))",
+};
 
 interface PostViewerProps {
   initialCandidates: CandidateStory[];
@@ -390,6 +410,8 @@ export const PostViewer = ({
 
   const bookmarked = bookmarkedIds.has(currentStory.id);
   const liked = likedIds.has(currentStory.id);
+  const hasPrevious = currentIndex > 0;
+  const hasNext = currentIndex + 1 < candidates.length;
 
   return (
     <>
@@ -433,7 +455,7 @@ export const PostViewer = ({
             {currentStory.score.toLocaleString()}
           </span>
         </div>
-        <div className="ml-auto flex items-center gap-2">
+        <div className="ml-auto hidden items-center gap-2 md:flex">
           <output aria-live="polite" className="text-sm">
             <span className="text-foreground">
               {(currentIndex + 1).toLocaleString()}
@@ -443,11 +465,10 @@ export const PostViewer = ({
               / {candidates.length.toLocaleString()}
             </span>
           </output>
-
           <div>
             <Button
               aria-label="Previous post"
-              disabled={currentIndex === 0}
+              disabled={!hasPrevious}
               onClick={handlePrevious}
               size="icon-sm"
               variant="ghost"
@@ -456,7 +477,7 @@ export const PostViewer = ({
             </Button>
             <Button
               aria-label="Next post"
-              disabled={currentIndex + 1 >= candidates.length}
+              disabled={!hasNext}
               onClick={handleNext}
               size="icon-sm"
               variant="ghost"
@@ -467,10 +488,51 @@ export const PostViewer = ({
         </div>
       </header>
       <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-scroll">
-        <div className="mx-auto max-w-[80ch] px-4 pt-4 pb-[60px]">
-          <PostCard onLinkClick={handleLinkClick} story={currentStory} />
+        <div className="mx-auto max-w-[80ch] px-4 pt-4 pb-24 md:pb-6">
+          <PostCard
+            hasNextPost={hasNext}
+            onLinkClick={handleLinkClick}
+            onNextPost={handleNext}
+            story={currentStory}
+          />
         </div>
       </main>
+      <div
+        className="fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 p-1.5 font-medium md:hidden"
+        data-slide-nav
+        style={MOBILE_SLIDE_NAV_STYLE}
+      >
+        <Button
+          aria-label="Previous post"
+          className="touch-manipulation rounded-full"
+          disabled={!hasPrevious}
+          onClick={handlePrevious}
+          size="icon-sm"
+          variant="ghost"
+        >
+          <ChevronLeft aria-hidden="true" className="size-4" />
+        </Button>
+        <span
+          aria-live="polite"
+          className="min-w-14 text-center text-foreground/70 text-xs tabular-nums"
+        >
+          <span className="sr-only">Post </span>
+          {currentIndex + 1}
+          <span className="sr-only"> of </span>
+          <span aria-hidden="true"> / </span>
+          {candidates.length}
+        </span>
+        <Button
+          aria-label="Next post"
+          className="touch-manipulation rounded-full"
+          disabled={!hasNext}
+          onClick={handleNext}
+          size="icon-sm"
+          variant="ghost"
+        >
+          <ChevronRight aria-hidden="true" className="size-4" />
+        </Button>
+      </div>
       <KeyboardShortcutsDialog
         onOpenChange={setShortcutsOpen}
         open={shortcutsOpen}
