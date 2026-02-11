@@ -11,7 +11,7 @@ export default function MainLayout({
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset className="flex h-[calc(100dvh-16px)] flex-col overflow-hidden">
+      <SidebarInset className="flex h-dvh flex-col overflow-hidden md:h-[calc(100dvh-16px)]">
         {children}
       </SidebarInset>
     </SidebarProvider>
