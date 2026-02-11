@@ -27,6 +27,7 @@ import { classifyTopics } from "@/lib/topics";
 import type { CandidateStory, EventType } from "@/lib/types";
 
 const LOAD_MORE_THRESHOLD = 10;
+const MAX_BACKGROUND_PAGES = 4;
 
 interface PostViewerProps {
   initialCandidates: CandidateStory[];
@@ -78,6 +79,64 @@ export const PostViewer = ({
     };
     init();
   }, [initialCandidates, isCollectionMode]);
+
+  useEffect(() => {
+    if (!isInitialized || isCollectionMode) {
+      return;
+    }
+
+    let cancelled = false;
+
+    const loadBackground = async () => {
+      if (loadingRef.current) {
+        return;
+      }
+      loadingRef.current = true;
+
+      const seen = await getSeenPostIds();
+      const events = await getEvents();
+
+      for (let page = 2; page <= MAX_BACKGROUND_PAGES; page++) {
+        if (cancelled) {
+          break;
+        }
+
+        const stories = await fetchFeed("news", page);
+        if (stories.length === 0) {
+          break;
+        }
+
+        nextPageRef.current = page + 1;
+
+        setCandidates((prev) => {
+          const merged = deduplicateStories([...prev, ...stories]);
+          const newOnly = merged.slice(prev.length);
+          if (newOnly.length === 0) {
+            return prev;
+          }
+
+          const fresh = newOnly.filter((s) => !seen.has(s.id));
+          const ranked = rankCandidates(fresh, events);
+          if (ranked.length === 0) {
+            return prev;
+          }
+
+          const currentIdx = indexRef.current;
+          const kept = prev.slice(0, currentIdx + 1);
+          const rest = [...prev.slice(currentIdx + 1), ...ranked];
+          return [...kept, ...rankCandidates(rest, events)];
+        });
+      }
+
+      loadingRef.current = false;
+    };
+
+    loadBackground();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [isInitialized, isCollectionMode]);
 
   const candidateMap = useMemo(
     () => new Map(candidates.map((c) => [c.id, c])),
@@ -424,7 +483,7 @@ export const PostViewer = ({
           </div>
         </div>
       </header>
-      <main className="min-h-0 flex-1 overflow-y-scroll">
+      <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-scroll">
         <div className="mx-auto max-w-[80ch] px-4 pt-4 pb-[60px]">
           <PostCard onLinkClick={handleLinkClick} story={currentStory} />
         </div>

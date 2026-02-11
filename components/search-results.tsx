@@ -2,8 +2,9 @@
 
 import { Loader2, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { PostViewer } from "@/components/post-viewer";
+import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearch } from "@/hooks/use-search";
@@ -12,6 +13,8 @@ import type { SearchSort } from "@/lib/hn-algolia";
 import type { CandidateStory } from "@/lib/types";
 import { relativeTime } from "@/lib/utils";
 import { Dot } from "./dot";
+
+const AUTO_LOAD_LIMIT = 3;
 
 interface SearchResultsProps {
   query: string;
@@ -30,6 +33,8 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
     useSearch({ query, sort, enabled: query.length > 0 });
 
   const sentinelRef = useRef<HTMLDivElement>(null);
+  const [autoLoadCount, setAutoLoadCount] = useState(0);
+  const showButton = autoLoadCount >= AUTO_LOAD_LIMIT;
 
   // Sync input with query prop
   useEffect(() => {
@@ -43,15 +48,22 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
     }
   }, [query, addSearch]);
 
+  // Reset auto-load counter when search changes
+  useEffect(() => {
+    setAutoLoadCount(0);
+  }, [query, sort]);
+
+  // Infinite scroll observer (disabled after AUTO_LOAD_LIMIT auto-loads)
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel) {
+    if (!sentinel || showButton) {
       return;
     }
 
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          setAutoLoadCount((c) => c + 1);
           fetchNextPage();
         }
       },
@@ -60,7 +72,12 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage]);
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, showButton]);
+
+  const handleLoadMore = useCallback(() => {
+    setAutoLoadCount(0);
+    fetchNextPage();
+  }, [fetchNextPage]);
 
   const handleSortChange = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -182,7 +199,7 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
           />
         )}
         {results.length > 0 && (
-          <div className="mx-auto max-w-[80ch]">
+          <div className="mx-auto max-w-[80ch] pb-8">
             {results.map((story, index) => (
               <SearchResultItem
                 key={story.id}
@@ -190,12 +207,23 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
                 story={story}
               />
             ))}
-            <div ref={sentinelRef} />
+            {!showButton && <div ref={sentinelRef} />}
             {isFetchingNextPage && (
               <div className="flex items-center justify-center py-4">
                 <div className="animate-spin">
                   <Loader2 className="size-5 text-muted-foreground" />
                 </div>
+              </div>
+            )}
+            {showButton && hasNextPage && !isFetchingNextPage && (
+              <div className="flex items-center justify-center py-4">
+                <Button
+                  onClick={handleLoadMore}
+                  type="button"
+                  variant="outline"
+                >
+                  Load more
+                </Button>
               </div>
             )}
           </div>
