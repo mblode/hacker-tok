@@ -160,7 +160,7 @@
 }
 
 .comment-wrap {
-  @apply border-border list-none py-6 border-t relative overflow-hidden;
+  @apply border-border list-none py-6 border-t relative;
 }
 
 .comment-wrap.toggled ul {
@@ -294,6 +294,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   *,
   *::before,
   *::after {
