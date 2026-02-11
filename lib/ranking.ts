@@ -160,6 +160,8 @@ export const rankCandidates = (
       processPositiveSignal(e, 1.0);
     } else if (e.type === "click") {
       processPositiveSignal(e, 1.2);
+    } else if (e.type === "bookmark") {
+      processPositiveSignal(e, 1.5);
     } else if (e.type === "skip") {
       skippedPostIds.add(e.postId);
     } else if (e.type === "dwell" && e.dwellMs != null) {

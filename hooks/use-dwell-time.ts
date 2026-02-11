@@ -35,7 +35,7 @@ export const useDwellTime = (
         by,
         domain,
         title,
-      });
+      }).catch(() => {});
       onDwell?.(dwellMs);
     };
   }, [postId, score, by, domain, title, onDwell]);

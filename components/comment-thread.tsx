@@ -9,11 +9,16 @@ import { useComments } from "@/hooks/use-comments";
 interface CommentThreadProps {
   postId: number;
   postUser: string;
+  postTitle: string;
 }
 
 const SKELETON_DELAY_MS = 200;
 
-export const CommentThread = ({ postId, postUser }: CommentThreadProps) => {
+export const CommentThread = ({
+  postId,
+  postUser,
+  postTitle,
+}: CommentThreadProps) => {
   const { comments, commentsCount, isLoading, error, retry } =
     useComments(postId);
   const [showSkeleton, setShowSkeleton] = useState(false);
@@ -80,6 +85,8 @@ export const CommentThread = ({ postId, postUser }: CommentThreadProps) => {
             id={comment.id}
             key={comment.id}
             level={comment.level}
+            postId={postId}
+            postTitle={postTitle}
             postUser={postUser}
             time={comment.time}
             user={comment.user}

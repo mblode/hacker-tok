@@ -6,7 +6,9 @@ interface KeyboardHandlers {
   onNext: () => void;
   onPrevious: () => void;
   onLike: () => void;
+  onBookmark: () => void;
   onToggleShortcuts?: () => void;
+  onFocusSearch?: () => void;
 }
 
 const IGNORED_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
@@ -37,6 +39,14 @@ export const useKeyboardNavigation = (handlers: KeyboardHandlers): void => {
         case "l":
           event.preventDefault();
           handlers.onLike();
+          break;
+        case "b":
+          event.preventDefault();
+          handlers.onBookmark();
+          break;
+        case "/":
+          event.preventDefault();
+          handlers.onFocusSearch?.();
           break;
         default:
           break;

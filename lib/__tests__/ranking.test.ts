@@ -525,4 +525,64 @@ describe("rankCandidates", () => {
       expect(result[0].id).toBe(2);
     });
   });
+
+  describe("bookmark affinity (1.5x multiplier)", () => {
+    it("bookmark events boost author/domain/keyword/topic affinity", () => {
+      const events: UserEvent[] = [
+        makeEvent({
+          type: "bookmark",
+          postId: 99,
+          by: "alice",
+          domain: "github.com",
+          title: "Rust Compiler Updates",
+          topics: ["programming"],
+        }),
+      ];
+      const candidates = [
+        makeStory({
+          id: 1,
+          by: "alice",
+          url: "https://github.com/rust",
+          title: "Rust Compiler Improvements",
+          score: 200,
+        }),
+        makeStory({
+          id: 2,
+          by: "nobody",
+          url: "https://random.com/stuff",
+          title: "Totally Different Topic Xyz",
+          score: 200,
+        }),
+      ];
+      const result = rankCandidates(candidates, events);
+      expect(result[0].id).toBe(1);
+    });
+
+    it("bookmarked author gets higher boost than liked author", () => {
+      const now = Date.now();
+      const events: UserEvent[] = [
+        makeEvent({
+          type: "bookmark",
+          postId: 99,
+          by: "bookmark-author",
+          timestamp: now,
+          title: "Unrelated Xyz",
+        }),
+        makeEvent({
+          type: "like",
+          postId: 98,
+          by: "like-author",
+          timestamp: now,
+          title: "Unrelated Abc",
+        }),
+      ];
+      const candidates = [
+        makeStory({ id: 1, by: "bookmark-author", score: 200 }),
+        makeStory({ id: 2, by: "like-author", score: 200 }),
+      ];
+      const result = rankCandidates(candidates, events);
+      // bookmark multiplier 1.5 > like multiplier 1.0
+      expect(result[0].by).toBe("bookmark-author");
+    });
+  });
 });

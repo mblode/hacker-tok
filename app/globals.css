@@ -261,9 +261,11 @@
   0% {
     transform: scale(1);
   }
+
   50% {
     transform: scale(1.25);
   }
+
   100% {
     transform: scale(1);
   }
@@ -271,6 +273,24 @@
 
 .like-pop {
   animation: like-pop 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes bookmark-pop {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.25);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+.bookmark-pop {
+  animation: bookmark-pop 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,10 +1,12 @@
 "use client";
 
 import DOMPurify from "dompurify";
-import { Heart } from "lucide-react";
-import { type ReactElement, useState } from "react";
+import { Bookmark, Heart } from "lucide-react";
+import { type ReactElement, useEffect, useState } from "react";
 import { Dot } from "@/components/dot";
 import { Button } from "@/components/ui/button";
+import { db } from "@/lib/db";
+import { addEvent, removeEventsByTypeAndComment } from "@/lib/events";
 import type { HNComment } from "@/lib/types";
 import { cn, relativeTime } from "@/lib/utils";
 
@@ -15,6 +17,8 @@ interface CommentItemProps {
   level: number;
   comments: HNComment[];
   postUser: string;
+  postId: number;
+  postTitle: string;
   id?: string | number;
 }
 
@@ -25,9 +29,77 @@ export const CommentItem = ({
   level,
   comments,
   postUser,
+  postId,
+  postTitle,
+  id,
 }: CommentItemProps) => {
   const [hidden, setHidden] = useState(false);
   const [liked, setLiked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+
+  const commentId = typeof id === "string" ? Number.parseInt(id, 10) : id;
+
+  useEffect(() => {
+    if (commentId == null) {
+      return;
+    }
+    db.events
+      .where("[type+commentId]")
+      .equals(["comment_like", commentId])
+      .count()
+      .then((count) => setLiked(count > 0));
+    db.events
+      .where("[type+commentId]")
+      .equals(["comment_bookmark", commentId])
+      .count()
+      .then((count) => setBookmarked(count > 0));
+  }, [commentId]);
+
+  const toggleLike = async () => {
+    if (commentId == null) {
+      return;
+    }
+    if (liked) {
+      await removeEventsByTypeAndComment("comment_like", commentId);
+      setLiked(false);
+    } else {
+      await addEvent({
+        type: "comment_like",
+        postId,
+        commentId,
+        commentUser: user,
+        commentContent: content,
+        commentTime: time,
+        timestamp: Date.now(),
+        score: 0,
+        title: postTitle,
+      });
+      setLiked(true);
+    }
+  };
+
+  const toggleBookmark = async () => {
+    if (commentId == null) {
+      return;
+    }
+    if (bookmarked) {
+      await removeEventsByTypeAndComment("comment_bookmark", commentId);
+      setBookmarked(false);
+    } else {
+      await addEvent({
+        type: "comment_bookmark",
+        postId,
+        commentId,
+        commentUser: user,
+        commentContent: content,
+        commentTime: time,
+        timestamp: Date.now(),
+        score: 0,
+        title: postTitle,
+      });
+      setBookmarked(true);
+    }
+  };
 
   const toggleHidden = () => {
     setHidden((current) => !current);
@@ -61,6 +133,8 @@ export const CommentItem = ({
               id={ele.id}
               key={ele.id}
               level={ele.level}
+              postId={postId}
+              postTitle={postTitle}
               postUser={postUser}
               time={ele.time}
               user={ele.user}
@@ -100,11 +174,31 @@ export const CommentItem = ({
             {relativeTime(time)}
           </span>
           <Button
-            aria-label="Like comment"
+            aria-label="Bookmark comment"
             className="ml-auto min-h-9 min-w-9 cursor-pointer"
             onClick={(e) => {
               e.stopPropagation();
-              setLiked((prev) => !prev);
+              toggleBookmark();
+            }}
+            size="icon-sm"
+            variant="ghost"
+          >
+            <Bookmark
+              className={cn(
+                "size-4",
+                bookmarked
+                  ? "bookmark-pop text-foreground"
+                  : "text-muted-foreground"
+              )}
+              fill={bookmarked ? "currentColor" : "none"}
+            />
+          </Button>
+          <Button
+            aria-label="Like comment"
+            className="min-h-9 min-w-9 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              toggleLike();
             }}
             size="icon-sm"
             variant="ghost"

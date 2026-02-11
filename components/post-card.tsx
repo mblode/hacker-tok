@@ -79,7 +79,11 @@ export const PostCard = ({ story, onLinkClick }: PostCardProps) => {
       </div>
 
       <div>
-        <CommentThread postId={story.id} postUser={story.by} />
+        <CommentThread
+          postId={story.id}
+          postTitle={story.title}
+          postUser={story.by}
+        />
       </div>
     </article>
   );

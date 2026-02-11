@@ -20,6 +20,8 @@ const shortcuts = [
       { label: "Next post", keys: ["J"] },
       { label: "Previous post", keys: ["K"] },
       { label: "Like post", keys: ["L"] },
+      { label: "Bookmark post", keys: ["B"] },
+      { label: "Focus search", keys: ["/"] },
       { label: "Toggle sidebar", keys: ["\u2318", "B"] },
     ],
   },
@@ -37,7 +39,7 @@ export const KeyboardShortcutsDialog = ({
     <Dialog onOpenChange={onOpenChange} open={open}>
       <DialogContent className="max-w-sm">
         <DialogHeader>
-          <DialogTitle>Keyboard Shortcuts</DialogTitle>
+          <DialogTitle>Keyboard shortcuts</DialogTitle>
         </DialogHeader>
         <div className="flex flex-col gap-6">
           {shortcuts.map((group) => (
