@@ -1,20 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
 
 export const useKeyboardShortcutsDialog = () => {
   const [open, setOpen] = useState(false);
 
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.metaKey && event.key === "/") {
-        event.preventDefault();
-        setOpen((prev) => !prev);
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  useHotkeys("mod+slash", () => setOpen((prev) => !prev), {
+    preventDefault: true,
+  });
 
   return { open, setOpen };
 };

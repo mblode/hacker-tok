@@ -1,6 +1,5 @@
 "use client";
 
-import DOMPurify from "dompurify";
 import { Bookmark, Heart } from "lucide-react";
 import { type ReactElement, useEffect, useState } from "react";
 import { Dot } from "@/components/dot";
@@ -39,8 +38,18 @@ export const CommentItem = ({
   const [hidden, setHidden] = useState(false);
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
+  const [sanitizedHtml, setSanitizedHtml] = useState("");
 
   const commentId = typeof id === "string" ? Number.parseInt(id, 10) : id;
+
+  useEffect(() => {
+    if (hidden) {
+      return;
+    }
+    import("dompurify").then(({ default: DOMPurify }) => {
+      setSanitizedHtml(DOMPurify.sanitize(content));
+    });
+  }, [content, hidden]);
 
   useEffect(() => {
     if (commentId == null) {
@@ -208,12 +217,10 @@ export const CommentItem = ({
           </Button>
         </header>
 
-        {!hidden && (
+        {!hidden && sanitizedHtml && (
           <div
             className="content"
-            dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(content),
-            }}
+            dangerouslySetInnerHTML={{ __html: sanitizedHtml }}
           />
         )}
       </div>

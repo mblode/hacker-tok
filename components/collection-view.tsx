@@ -3,6 +3,7 @@
 import { Bookmark, Heart, Loader2 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { PostViewer } from "@/components/post-viewer";
+import { StoryListItem } from "@/components/story-list-item";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -147,7 +148,7 @@ export const CollectionView = ({
         <EmptyState message={emptyMessage} />
       )}
       {!isLoading && candidates.length > 0 && (
-        <div className="mx-auto max-w-[80ch] divide-y divide-border">
+        <div className="mx-auto max-w-[80ch]">
           {candidates.map((story, index) => (
             <CollectionItem
               collectionType={type}
@@ -197,7 +198,7 @@ export const CollectionView = ({
               />
             )}
             {!isLoading && likedComments.length > 0 && (
-              <div className="mx-auto max-w-[80ch] divide-y divide-border">
+              <div className="mx-auto max-w-[80ch]">
                 {likedComments.map((comment) => (
                   <CommentCollectionItem
                     collectionType={type}
@@ -273,64 +274,8 @@ const CollectionItem = ({
   const isBookmarked = collectionType === "bookmark" ? true : otherActive;
   const isLiked = collectionType === "like" ? true : otherActive;
 
-  const domain = story.url
-    ? new URL(story.url).hostname.replace("www.", "")
-    : null;
-  const timeAgo = relativeTime(story.time);
-
   return (
-    <div className="flex items-start gap-3 px-4 py-3">
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-x-1 text-muted-foreground text-xs">
-          {domain && (
-            <>
-              <a
-                className="transition-colors hover:text-foreground hover:underline"
-                href={story.url ?? undefined}
-                onClick={(e) => e.stopPropagation()}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {domain}
-              </a>
-              <Dot />
-            </>
-          )}
-          {story.by && (
-            <>
-              <a
-                className="username transition-colors hover:text-foreground hover:underline"
-                href={`https://news.ycombinator.com/user?id=${story.by}`}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {story.by}
-              </a>
-              <Dot />
-            </>
-          )}
-          <span>{timeAgo}</span>
-        </div>
-        <button
-          className="cursor-pointer text-left hover:underline"
-          onClick={onSelect}
-          type="button"
-        >
-          {story.title}
-        </button>
-        <button
-          className="flex cursor-pointer items-center gap-x-3 pt-1 text-muted-foreground text-xs transition-colors hover:text-foreground hover:underline"
-          onClick={onSelect}
-          type="button"
-        >
-          {story.score > 0 && (
-            <span>{story.score.toLocaleString()} points</span>
-          )}
-          {story.descendants > 0 && (
-            <span>{story.descendants.toLocaleString()} comments</span>
-          )}
-        </button>
-      </div>
+    <StoryListItem onSelect={onSelect} story={story}>
       <Button
         aria-label={isBookmarked ? "Remove bookmark" : "Bookmark"}
         onClick={
@@ -354,7 +299,7 @@ const CollectionItem = ({
       >
         <Heart className="size-4" fill={isLiked ? "currentColor" : "none"} />
       </Button>
-    </div>
+    </StoryListItem>
   );
 };
 
@@ -408,7 +353,7 @@ const CommentCollectionItem = ({
     plainText.length > 200 ? `${plainText.slice(0, 200)}…` : plainText;
 
   return (
-    <div className="flex items-start gap-3 px-4 py-3">
+    <div className="mx-4 flex items-start gap-3 border-border border-b py-3">
       <div className="min-w-0 flex-1">
         <div className="flex flex-wrap items-center gap-x-1 text-muted-foreground text-xs">
           <a

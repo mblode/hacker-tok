@@ -17,12 +17,19 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useKeyboardShortcutsDialog } from "@/hooks/use-keyboard-shortcuts-dialog";
+import { useGlobalShortcuts } from "@/hooks/use-global-shortcuts";
 
-export const AppSidebar = () => {
+interface AppSidebarProps {
+  shortcutsOpen: boolean;
+  setShortcutsOpen: (open: boolean) => void;
+}
+
+export const AppSidebar = ({
+  shortcutsOpen,
+  setShortcutsOpen,
+}: AppSidebarProps) => {
   const pathname = usePathname();
-  const { open: shortcutsOpen, setOpen: setShortcutsOpen } =
-    useKeyboardShortcutsDialog();
+  useGlobalShortcuts();
 
   const isHome = pathname === "/";
   const isLikes = pathname === "/likes";

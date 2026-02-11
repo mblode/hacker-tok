@@ -1,18 +1,22 @@
 "use client";
 
-import { Loader2, Search, X } from "lucide-react";
+import { Bookmark, Heart, Loader2, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PostViewer } from "@/components/post-viewer";
+import { StoryListItem } from "@/components/story-list-item";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearch } from "@/hooks/use-search";
 import { useSearchHistory } from "@/hooks/use-search-history";
+import {
+  addEvent,
+  hasEventForPost,
+  removeEventsByTypeAndPost,
+} from "@/lib/events";
 import type { SearchSort } from "@/lib/hn-algolia";
 import type { CandidateStory } from "@/lib/types";
-import { relativeTime } from "@/lib/utils";
-import { Dot } from "./dot";
 
 const AUTO_LOAD_LIMIT = 3;
 
@@ -318,64 +322,71 @@ interface SearchResultItemProps {
 }
 
 const SearchResultItem = ({ story, onSelect }: SearchResultItemProps) => {
-  const domain = story.url
-    ? new URL(story.url).hostname.replace("www.", "")
-    : null;
-  const timeAgo = relativeTime(story.time);
+  const [liked, setLiked] = useState(false);
+  const [bookmarked, setBookmarked] = useState(false);
+
+  useEffect(() => {
+    hasEventForPost("like", story.id).then(setLiked);
+    hasEventForPost("bookmark", story.id).then(setBookmarked);
+  }, [story.id]);
+
+  const toggleLike = async () => {
+    if (liked) {
+      await removeEventsByTypeAndPost("like", story.id);
+    } else {
+      await addEvent({
+        type: "like",
+        postId: story.id,
+        timestamp: Date.now(),
+        score: story.score,
+        by: story.by,
+        title: story.title,
+        url: story.url,
+        descendants: story.descendants,
+      });
+    }
+    setLiked((prev) => !prev);
+  };
+
+  const toggleBookmark = async () => {
+    if (bookmarked) {
+      await removeEventsByTypeAndPost("bookmark", story.id);
+    } else {
+      await addEvent({
+        type: "bookmark",
+        postId: story.id,
+        timestamp: Date.now(),
+        score: story.score,
+        by: story.by,
+        title: story.title,
+        url: story.url,
+        descendants: story.descendants,
+      });
+    }
+    setBookmarked((prev) => !prev);
+  };
 
   return (
-    <div className="flex items-start gap-3 border-border border-b px-4 py-3">
-      <div className="min-w-0 flex-1">
-        <div className="flex flex-wrap items-center gap-x-1 text-muted-foreground text-xs">
-          {domain && (
-            <>
-              <a
-                className="transition-colors hover:text-foreground hover:underline"
-                href={story.url ?? undefined}
-                onClick={(e) => e.stopPropagation()}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {domain}
-              </a>
-              <Dot />
-            </>
-          )}
-          {story.by && (
-            <>
-              <a
-                className="username transition-colors hover:text-foreground hover:underline"
-                href={`https://news.ycombinator.com/user?id=${story.by}`}
-                rel="noopener noreferrer"
-                target="_blank"
-              >
-                {story.by}
-              </a>
-              <Dot />
-            </>
-          )}
-          <span>{timeAgo}</span>
-        </div>
-        <button
-          className="cursor-pointer text-left hover:underline"
-          onClick={onSelect}
-          type="button"
-        >
-          {story.title}
-        </button>
-        <button
-          className="flex cursor-pointer items-center gap-x-3 pt-1 text-muted-foreground text-xs transition-colors hover:text-foreground hover:underline"
-          onClick={onSelect}
-          type="button"
-        >
-          {story.score > 0 && (
-            <span>{story.score.toLocaleString()} points</span>
-          )}
-          {story.descendants > 0 && (
-            <span>{story.descendants.toLocaleString()} comments</span>
-          )}
-        </button>
-      </div>
-    </div>
+    <StoryListItem onSelect={onSelect} story={story}>
+      <Button
+        aria-label={bookmarked ? "Remove bookmark" : "Bookmark"}
+        onClick={toggleBookmark}
+        size="icon-sm"
+        variant="ghost"
+      >
+        <Bookmark
+          className="size-4"
+          fill={bookmarked ? "currentColor" : "none"}
+        />
+      </Button>
+      <Button
+        aria-label={liked ? "Remove like" : "Like"}
+        onClick={toggleLike}
+        size="icon-sm"
+        variant="ghost"
+      >
+        <Heart className="size-4" fill={liked ? "currentColor" : "none"} />
+      </Button>
+    </StoryListItem>
   );
 };

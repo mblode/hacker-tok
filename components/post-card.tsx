@@ -8,8 +8,6 @@ import { relativeTime } from "@/lib/utils";
 interface PostCardProps {
   story: CandidateStory;
   onLinkClick?: () => void;
-  hasNextPost?: boolean;
-  onNextPost?: () => void;
 }
 
 const WWW_PREFIX = /^www\./;
@@ -25,12 +23,7 @@ const extractDomain = (url: string | null): string | null => {
   }
 };
 
-export const PostCard = ({
-  story,
-  onLinkClick,
-  hasNextPost = false,
-  onNextPost,
-}: PostCardProps) => {
+export const PostCard = ({ story, onLinkClick }: PostCardProps) => {
   const domain = extractDomain(story.url);
 
   return (
@@ -87,8 +80,6 @@ export const PostCard = ({
 
       <div>
         <CommentThread
-          hasNextPost={hasNextPost}
-          onNextPost={onNextPost}
           postId={story.id}
           postTitle={story.title}
           postUser={story.by}

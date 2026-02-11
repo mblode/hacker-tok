@@ -10,6 +10,8 @@ import {
   Heart,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useHotkeys } from "react-hotkeys-hook";
+import { FeedSkeleton } from "@/components/feed-skeleton";
 import { PostCard } from "@/components/post-card";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -52,6 +54,7 @@ export const PostViewer = ({
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<number>>(new Set());
   const [animatingLike, setAnimatingLike] = useState(false);
   const [animatingBookmark, setAnimatingBookmark] = useState(false);
+  const [ready, setReady] = useState(isCollectionMode);
 
   useEffect(() => {
     const init = async () => {
@@ -59,7 +62,8 @@ export const PostViewer = ({
 
       if (!isCollectionMode) {
         const unseen = initialCandidates.filter((c) => !seen.has(c.id));
-        setCandidates(rankCandidates(unseen, events));
+        const toRank = unseen.length > 0 ? unseen : initialCandidates;
+        setCandidates(rankCandidates(toRank, events));
       }
 
       setLikedIds(
@@ -70,6 +74,7 @@ export const PostViewer = ({
           events.filter((e) => e.type === "bookmark").map((e) => e.postId)
         )
       );
+      setReady(true);
     };
     init();
   }, [initialCandidates, isCollectionMode]);
@@ -87,23 +92,25 @@ export const PostViewer = ({
       }
       loadingRef.current = true;
 
-      const seen = await getSeenPostIds();
-      const events = await getEvents();
+      const [seen, events, ...pages] = await Promise.all([
+        getSeenPostIds(),
+        getEvents(),
+        ...Array.from({ length: MAX_BACKGROUND_PAGES - 1 }, (_, i) =>
+          fetchFeed("news", i + 2)
+        ),
+      ]);
 
-      for (let page = 2; page <= MAX_BACKGROUND_PAGES; page++) {
-        if (cancelled) {
-          break;
-        }
+      if (cancelled) {
+        loadingRef.current = false;
+        return;
+      }
 
-        const stories = await fetchFeed("news", page);
-        if (stories.length === 0) {
-          break;
-        }
+      const allStories = pages.flat();
+      nextPageRef.current = MAX_BACKGROUND_PAGES + 1;
 
-        nextPageRef.current = page + 1;
-
+      if (allStories.length > 0) {
         setCandidates((prev) => {
-          const merged = deduplicateStories([...prev, ...stories]);
+          const merged = deduplicateStories([...prev, ...allStories]);
           const newOnly = merged.slice(prev.length);
           if (newOnly.length === 0) {
             return prev;
@@ -300,6 +307,24 @@ export const PostViewer = ({
     }
   };
 
+  const handleOpenLink = () => {
+    if (currentStory?.url) {
+      window.open(currentStory.url, "_blank", "noopener,noreferrer");
+      recordEvent(currentStory.id, "click");
+      rerankFrom(currentIndex + 1);
+    }
+  };
+
+  const handleOpenHN = () => {
+    if (currentStory) {
+      window.open(
+        `https://news.ycombinator.com/item?id=${currentStory.id}`,
+        "_blank",
+        "noopener,noreferrer"
+      );
+    }
+  };
+
   const handlePrevious = () => {
     hasNavigated.current = true;
     setAnimatingLike(false);
@@ -330,6 +355,8 @@ export const PostViewer = ({
     onPrevious: handlePrevious,
     onLike: handleLike,
     onBookmark: handleBookmark,
+    onOpenLink: handleOpenLink,
+    onOpenHN: handleOpenHN,
     onFocusSearch: () => {
       const input = document.querySelector<HTMLInputElement>(
         'input[type="search"]'
@@ -342,24 +369,11 @@ export const PostViewer = ({
     },
   });
 
-  useEffect(() => {
-    if (!onBack) {
-      return;
-    }
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (
-        e.key === "Escape" &&
-        !e.metaKey &&
-        !e.ctrlKey &&
-        !(e.target instanceof HTMLInputElement) &&
-        !(e.target instanceof HTMLTextAreaElement)
-      ) {
-        handleBack();
-      }
-    };
-    window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [onBack, handleBack]);
+  useHotkeys("escape", handleBack, { enabled: !!onBack });
+
+  if (!ready) {
+    return <FeedSkeleton />;
+  }
 
   if (!currentStory) {
     return (
@@ -467,12 +481,7 @@ export const PostViewer = ({
       </header>
       <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-scroll">
         <div className="mx-auto max-w-[80ch] px-4 pt-4 pb-24 md:pb-6">
-          <PostCard
-            hasNextPost={hasNext}
-            onLinkClick={handleLinkClick}
-            onNextPost={handleNext}
-            story={currentStory}
-          />
+          <PostCard onLinkClick={handleLinkClick} story={currentStory} />
         </div>
       </main>
       <div

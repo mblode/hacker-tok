@@ -10,8 +10,6 @@ interface CommentThreadProps {
   postId: number;
   postUser: string;
   postTitle: string;
-  hasNextPost?: boolean;
-  onNextPost?: () => void;
 }
 
 const SKELETON_DELAY_MS = 200;
@@ -20,25 +18,9 @@ export const CommentThread = ({
   postId,
   postUser,
   postTitle,
-  hasNextPost = false,
-  onNextPost,
 }: CommentThreadProps) => {
   const { comments, isLoading, error, retry } = useComments(postId);
   const [showSkeleton, setShowSkeleton] = useState(false);
-
-  const renderNextPostCta = () => {
-    if (!(hasNextPost && onNextPost)) {
-      return null;
-    }
-
-    return (
-      <div className="mt-8 border-border border-t pt-6">
-        <Button className="h-12 w-full sm:w-auto" onClick={onNextPost}>
-          Next post
-        </Button>
-      </div>
-    );
-  };
 
   useEffect(() => {
     if (!isLoading) {
@@ -84,7 +66,6 @@ export const CommentThread = ({
             Try again
           </Button>
         </div>
-        {renderNextPostCta()}
       </div>
     );
   }
@@ -93,30 +74,26 @@ export const CommentThread = ({
     return (
       <div>
         <div className="text-muted-foreground text-sm">No comments yet.</div>
-        {renderNextPostCta()}
       </div>
     );
   }
 
   return (
-    <>
-      <ul className="m-0 p-0">
-        {comments.map((comment) => (
-          <CommentItem
-            comments={comment.comments}
-            content={comment.content}
-            id={comment.id}
-            key={comment.id}
-            level={comment.level}
-            postId={postId}
-            postTitle={postTitle}
-            postUser={postUser}
-            time={comment.time}
-            user={comment.user}
-          />
-        ))}
-      </ul>
-      {renderNextPostCta()}
-    </>
+    <ul className="m-0 p-0">
+      {comments.map((comment) => (
+        <CommentItem
+          comments={comment.comments}
+          content={comment.content}
+          id={comment.id}
+          key={comment.id}
+          level={comment.level}
+          postId={postId}
+          postTitle={postTitle}
+          postUser={postUser}
+          time={comment.time}
+          user={comment.user}
+        />
+      ))}
+    </ul>
   );
 };
