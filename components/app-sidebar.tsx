@@ -30,7 +30,7 @@ export const AppSidebar = () => {
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
-        <div className="flex items-center justify-between px-2 py-1">
+        <div className="flex items-center justify-between pl-2 py-1 pr-1">
           <Link className="font-semibold text-lg" href="/">
             HackerTok
           </Link>
