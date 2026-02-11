@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 const SITE_URL = "https://hackertok.blode.co";
 const SITE_NAME = "HackerTok";
 const SITE_DESCRIPTION =
-  "Swipe through the best Hacker News stories — a TikTok-style feed for HN, ranked by your reading habits.";
+  "TikTok-style feed for HN, ranked by your reading habits.";
 
 export const metadata: Metadata = {
   title: {
