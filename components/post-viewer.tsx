@@ -9,14 +9,7 @@ import {
   ChevronUp,
   Heart,
 } from "lucide-react";
-import {
-  type CSSProperties,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
 import { PostCard } from "@/components/post-card";
 import { Button } from "@/components/ui/button";
@@ -36,17 +29,6 @@ import type { CandidateStory, EventType } from "@/lib/types";
 
 const LOAD_MORE_THRESHOLD = 10;
 const MAX_BACKGROUND_PAGES = 4;
-const MOBILE_SLIDE_NAV_STYLE: CSSProperties = {
-  border: "1px solid rgba(255, 255, 255, 0.45)",
-  backdropFilter: "blur(20px)",
-  background:
-    "linear-gradient(90deg, rgba(255, 255, 255, 0.44) 0%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 255, 255, 0.44) 100%)",
-  borderRadius: "9999px",
-  boxShadow:
-    "rgba(32, 34, 55, 0.06) 0px 8px 12px -6px inset, rgba(32, 34, 55, 0.08) 0px 0px 0px 1px, rgba(32, 34, 55, 0.08) 0px 8px 16px -10px",
-  opacity: 1,
-  bottom: "calc(0.75rem + env(safe-area-inset-bottom))",
-};
 
 interface PostViewerProps {
   initialCandidates: CandidateStory[];
@@ -498,9 +480,8 @@ export const PostViewer = ({
         </div>
       </main>
       <div
-        className="fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 p-1.5 font-medium md:hidden"
+        className="slide-nav fixed left-1/2 z-50 flex -translate-x-1/2 items-center gap-1 p-1.5 font-medium md:hidden"
         data-slide-nav
-        style={MOBILE_SLIDE_NAV_STYLE}
       >
         <Button
           aria-label="Previous post"

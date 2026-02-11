@@ -101,7 +101,16 @@ export const CommentItem = ({
   };
 
   const onToggleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    toggleHidden();
+  };
+
+  const onToggleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
     event.preventDefault();
+    event.stopPropagation();
     toggleHidden();
   };
 
@@ -133,16 +142,15 @@ export const CommentItem = ({
   return (
     <li className={cn("comment-wrap", { toggled: hidden })}>
       <div className={cn("comment", { toggled: hidden })} data-level={level}>
-        <div className={cn("comment-toggle", { toggled: hidden })}>
-          <button
-            aria-expanded={!hidden}
-            aria-label={hidden ? "Expand comment" : "Collapse comment"}
-            className="mr-1 cursor-pointer rounded-sm px-1.5 py-0.5 text-muted-foreground hover:text-foreground"
-            onClick={onToggleClick}
-            type="button"
-          >
-            {hidden ? "[+]" : "[-]"}
-          </button>
+        {/* biome-ignore lint/a11y/useSemanticElements: Header wraps a link; avoid nesting interactive elements. */}
+        <header
+          aria-expanded={!hidden}
+          className={cn("comment-toggle", { toggled: hidden })}
+          onClick={onToggleClick}
+          onKeyDown={onToggleKeyDown}
+          role="button"
+          tabIndex={0}
+        >
           <a
             className={cn("username", {
               "text-orange-500!": user === postUser,
@@ -198,7 +206,7 @@ export const CommentItem = ({
               fill={liked ? "currentColor" : "none"}
             />
           </Button>
-        </div>
+        </header>
 
         {!hidden && (
           <div
