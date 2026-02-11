@@ -5,8 +5,11 @@ import { Bookmark, Heart } from "lucide-react";
 import { type ReactElement, useEffect, useState } from "react";
 import { Dot } from "@/components/dot";
 import { Button } from "@/components/ui/button";
-import { db } from "@/lib/db";
-import { addEvent, removeEventsByTypeAndComment } from "@/lib/events";
+import {
+  addEvent,
+  hasEventForComment,
+  removeEventsByTypeAndComment,
+} from "@/lib/events";
 import type { HNComment } from "@/lib/types";
 import { cn, relativeTime } from "@/lib/utils";
 
@@ -43,16 +46,8 @@ export const CommentItem = ({
     if (commentId == null) {
       return;
     }
-    db.events
-      .where("[type+commentId]")
-      .equals(["comment_like", commentId])
-      .count()
-      .then((count) => setLiked(count > 0));
-    db.events
-      .where("[type+commentId]")
-      .equals(["comment_bookmark", commentId])
-      .count()
-      .then((count) => setBookmarked(count > 0));
+    hasEventForComment("comment_like", commentId).then(setLiked);
+    hasEventForComment("comment_bookmark", commentId).then(setBookmarked);
   }, [commentId]);
 
   const toggleLike = async () => {

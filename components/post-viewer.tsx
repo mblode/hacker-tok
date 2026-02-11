@@ -6,7 +6,6 @@ import {
   ChevronDown,
   ChevronUp,
   Heart,
-  Loader2,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
@@ -46,42 +45,36 @@ export const PostViewer = ({
 }: PostViewerProps) => {
   const isCollectionMode = mode === "collection";
 
-  const [candidates, setCandidates] = useState<CandidateStory[]>([]);
+  const [candidates, setCandidates] =
+    useState<CandidateStory[]>(initialCandidates);
   const [likedIds, setLikedIds] = useState<Set<number>>(new Set());
   const [bookmarkedIds, setBookmarkedIds] = useState<Set<number>>(new Set());
   const [animatingLike, setAnimatingLike] = useState(false);
   const [animatingBookmark, setAnimatingBookmark] = useState(false);
-  const [isInitialized, setIsInitialized] = useState(false);
 
   useEffect(() => {
     const init = async () => {
-      if (isCollectionMode) {
-        setCandidates(initialCandidates);
-      } else {
-        const [seen, events] = await Promise.all([
-          getSeenPostIds(),
-          getEvents(),
-        ]);
+      const [seen, events] = await Promise.all([getSeenPostIds(), getEvents()]);
+
+      if (!isCollectionMode) {
         const unseen = initialCandidates.filter((c) => !seen.has(c.id));
         setCandidates(rankCandidates(unseen, events));
       }
 
-      const allEvents = await getEvents();
       setLikedIds(
-        new Set(allEvents.filter((e) => e.type === "like").map((e) => e.postId))
+        new Set(events.filter((e) => e.type === "like").map((e) => e.postId))
       );
       setBookmarkedIds(
         new Set(
-          allEvents.filter((e) => e.type === "bookmark").map((e) => e.postId)
+          events.filter((e) => e.type === "bookmark").map((e) => e.postId)
         )
       );
-      setIsInitialized(true);
     };
     init();
   }, [initialCandidates, isCollectionMode]);
 
   useEffect(() => {
-    if (!isInitialized || isCollectionMode) {
+    if (isCollectionMode) {
       return;
     }
 
@@ -136,7 +129,7 @@ export const PostViewer = ({
     return () => {
       cancelled = true;
     };
-  }, [isInitialized, isCollectionMode]);
+  }, [isCollectionMode]);
 
   const candidateMap = useMemo(
     () => new Map(candidates.map((c) => [c.id, c])),
@@ -324,14 +317,14 @@ export const PostViewer = ({
 
   const currentStoryId = currentStory?.id;
   useEffect(() => {
-    if (!(currentStoryId && isInitialized)) {
+    if (!currentStoryId) {
       return;
     }
     if (mode === "feed" && !hasNavigated.current) {
       return;
     }
     window.history.replaceState(null, "", `/post/${currentStoryId}`);
-  }, [currentStoryId, isInitialized, mode]);
+  }, [currentStoryId, mode]);
 
   useKeyboardNavigation({
     onNext: handleNext,
@@ -369,16 +362,6 @@ export const PostViewer = ({
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [onBack, handleBack]);
-
-  if (!isInitialized) {
-    return (
-      <div className="flex h-dvh items-center justify-center">
-        <div className="animate-spin">
-          <Loader2 className="size-6 text-muted-foreground" />
-        </div>
-      </div>
-    );
-  }
 
   if (!currentStory) {
     return (

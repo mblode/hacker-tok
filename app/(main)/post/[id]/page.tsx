@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { PostViewer } from "@/components/post-viewer";
 import { fetchItem } from "@/lib/hn-api";
+import { fetchFeed } from "@/lib/hn-live";
 import type { CandidateStory } from "@/lib/types";
 
 interface PostPageProps {
@@ -54,11 +55,15 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound();
   }
 
-  const item = await fetchItem(numId);
+  const [item, feedStories] = await Promise.all([
+    fetchItem(numId),
+    fetchFeed("news", 1),
+  ]);
   if (!item) {
     notFound();
   }
 
   const candidate = toCandidateStory(item);
-  return <PostViewer initialCandidates={[candidate]} mode="collection" />;
+  const rest = feedStories.filter((s) => s.id !== numId);
+  return <PostViewer initialCandidates={[candidate, ...rest]} originPath="/" />;
 }

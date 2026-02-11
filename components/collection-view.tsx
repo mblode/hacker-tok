@@ -6,9 +6,11 @@ import { PostViewer } from "@/components/post-viewer";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { db } from "@/lib/db";
 import {
   addEvent,
+  getEventsByType,
+  hasEventForComment,
+  hasEventForPost,
   removeEventsByTypeAndComment,
   removeEventsByTypeAndPost,
 } from "@/lib/events";
@@ -64,11 +66,7 @@ export const CollectionView = ({
 
   const loadCandidates = useCallback(async () => {
     setIsLoading(true);
-    const events = await db.events
-      .where("type")
-      .equals(type)
-      .reverse()
-      .sortBy("timestamp");
+    const events = await getEventsByType(type);
 
     const seen = new Set<number>();
     const unique = events.filter((e) => {
@@ -82,11 +80,7 @@ export const CollectionView = ({
     setCandidates(unique.map(toCandidateStory));
 
     if (showTabs) {
-      const commentEvents = await db.events
-        .where("type")
-        .equals(commentEventType)
-        .reverse()
-        .sortBy("timestamp");
+      const commentEvents = await getEventsByType(commentEventType);
 
       const seenComments = new Set<number>();
       const uniqueComments = commentEvents.filter((e) => {
@@ -253,11 +247,7 @@ const CollectionItem = ({
   const otherType: EventType = collectionType === "like" ? "bookmark" : "like";
 
   useEffect(() => {
-    db.events
-      .where("[type+postId]")
-      .equals([otherType, story.id])
-      .count()
-      .then((count) => setOtherActive(count > 0));
+    hasEventForPost(otherType, story.id).then(setOtherActive);
   }, [otherType, story.id]);
 
   const toggleOther = async () => {
@@ -383,11 +373,9 @@ const CommentCollectionItem = ({
     collectionType === "like" ? "comment_bookmark" : "comment_like";
 
   useEffect(() => {
-    db.events
-      .where("[type+commentId]")
-      .equals([otherCommentType, comment.commentId])
-      .count()
-      .then((count) => setOtherActive(count > 0));
+    hasEventForComment(otherCommentType, comment.commentId).then(
+      setOtherActive
+    );
   }, [otherCommentType, comment.commentId]);
 
   const toggleOther = async () => {

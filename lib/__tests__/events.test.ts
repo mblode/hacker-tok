@@ -1,10 +1,13 @@
 import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { db } from "@/lib/db";
+import { _db } from "@/lib/db";
 import {
   addEvent,
   getEvents,
+  getEventsByType,
   getSeenPostIds,
+  hasEventForComment,
+  hasEventForPost,
   removeEventsByTypeAndComment,
   removeEventsByTypeAndPost,
 } from "@/lib/events";
@@ -23,7 +26,7 @@ const makeEvent = (
 });
 
 beforeEach(async () => {
-  await db.events.clear();
+  await _db.events.clear();
 });
 
 describe("events (Dexie)", () => {
@@ -116,6 +119,46 @@ describe("events (Dexie)", () => {
       expect(events.filter((e) => e.type === "comment_bookmark")).toHaveLength(
         0
       );
+    });
+  });
+
+  describe("getEventsByType", () => {
+    it("returns events of specified type sorted by timestamp descending", async () => {
+      await addEvent(makeEvent({ type: "like", postId: 1, timestamp: 100 }));
+      await addEvent(makeEvent({ type: "like", postId: 2, timestamp: 300 }));
+      await addEvent(makeEvent({ type: "click", postId: 3, timestamp: 200 }));
+      const likes = await getEventsByType("like");
+      expect(likes).toHaveLength(2);
+      expect(likes[0].timestamp).toBeGreaterThanOrEqual(likes[1].timestamp);
+    });
+
+    it("returns empty array when no events of type exist", async () => {
+      const likes = await getEventsByType("like");
+      expect(likes).toEqual([]);
+    });
+  });
+
+  describe("hasEventForPost", () => {
+    it("returns true when matching event exists", async () => {
+      await addEvent(makeEvent({ type: "like", postId: 42 }));
+      expect(await hasEventForPost("like", 42)).toBe(true);
+    });
+
+    it("returns false when no matching event exists", async () => {
+      expect(await hasEventForPost("like", 999)).toBe(false);
+    });
+  });
+
+  describe("hasEventForComment", () => {
+    it("returns true when matching event exists", async () => {
+      await addEvent(
+        makeEvent({ type: "comment_like", postId: 1, commentId: 77 })
+      );
+      expect(await hasEventForComment("comment_like", 77)).toBe(true);
+    });
+
+    it("returns false when no matching event exists", async () => {
+      expect(await hasEventForComment("comment_bookmark", 999)).toBe(false);
     });
   });
 });
