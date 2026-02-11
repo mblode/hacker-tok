@@ -32,6 +32,7 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
   const { results, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
     useSearch({ query, sort, enabled: query.length > 0 });
 
+  const inputRef = useRef<HTMLInputElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const previousSearchRef = useRef<{ query: string; sort: SearchSort } | null>(
     null
@@ -43,6 +44,11 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
   useEffect(() => {
     setInputValue(query);
   }, [query]);
+
+  // Auto-focus input on mount (works with client-side navigation)
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
 
   // Record search in history when query arrives via URL
   useEffect(() => {
@@ -109,6 +115,8 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
       const params = new URLSearchParams();
       params.set("q", trimmed);
       router.push(`/search?${params.toString()}`);
+    } else if (query) {
+      router.push("/search");
     }
   };
 
@@ -153,10 +161,10 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
         >
           <Search className="size-4 shrink-0 text-muted-foreground" />
           <input
-            autoFocus
             className="h-8 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Search stories..."
+            ref={inputRef}
             type="text"
             value={inputValue}
           />
@@ -271,24 +279,26 @@ const RecentSearches = ({
         </h2>
       </div>
       {searches.map((query) => (
-        <div className="group flex items-center gap-3 px-4 py-3" key={query}>
+        <button
+          className="flex w-full cursor-pointer items-center gap-3 rounded-md px-4 py-3 text-left text-sm hover:bg-accent"
+          key={query}
+          onClick={() => onSelect(query)}
+          type="button"
+        >
           <Search className="size-4 shrink-0 text-muted-foreground" />
-          <button
-            className="flex-1 cursor-pointer text-left text-sm hover:underline"
-            onClick={() => onSelect(query)}
-            type="button"
-          >
-            {query}
-          </button>
+          <span className="flex-1">{query}</span>
           <button
             aria-label={`Remove "${query}" from recent searches`}
-            className="shrink-0 cursor-pointer rounded-sm p-1 text-muted-foreground opacity-0 transition-opacity hover:text-foreground group-hover:opacity-100"
-            onClick={() => onRemove(query)}
+            className="shrink-0 cursor-pointer rounded-sm p-1 text-muted-foreground hover:text-foreground"
+            onClick={(e) => {
+              e.stopPropagation();
+              onRemove(query);
+            }}
             type="button"
           >
             <X className="size-3.5" />
           </button>
-        </div>
+        </button>
       ))}
       <button
         className="flex cursor-pointer items-center gap-3 px-4 py-3 text-muted-foreground text-sm hover:text-foreground"
@@ -320,7 +330,7 @@ const SearchResultItem = ({ story, onSelect }: SearchResultItemProps) => {
           {domain && (
             <>
               <a
-                className="hover:underline"
+                className="transition-colors hover:text-foreground hover:underline"
                 href={story.url ?? undefined}
                 onClick={(e) => e.stopPropagation()}
                 rel="noopener noreferrer"
@@ -334,7 +344,7 @@ const SearchResultItem = ({ story, onSelect }: SearchResultItemProps) => {
           {story.by && (
             <>
               <a
-                className="username hover:underline"
+                className="username transition-colors hover:text-foreground hover:underline"
                 href={`https://news.ycombinator.com/user?id=${story.by}`}
                 rel="noopener noreferrer"
                 target="_blank"
@@ -347,14 +357,14 @@ const SearchResultItem = ({ story, onSelect }: SearchResultItemProps) => {
           <span>{timeAgo}</span>
         </div>
         <button
-          className="cursor-pointer text-left font-medium text-sm hover:underline"
+          className="cursor-pointer text-left hover:underline"
           onClick={onSelect}
           type="button"
         >
           {story.title}
         </button>
         <button
-          className="flex cursor-pointer items-center gap-x-3 pt-1 text-muted-foreground text-xs transition-colors hover:text-foreground"
+          className="flex cursor-pointer items-center gap-x-3 pt-1 text-muted-foreground text-xs transition-colors hover:text-foreground hover:underline"
           onClick={onSelect}
           type="button"
         >

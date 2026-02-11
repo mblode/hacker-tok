@@ -65,6 +65,17 @@ export const KeyboardShortcutsDialog = ({
             </div>
           ))}
         </div>
+        <p className="text-center text-muted-foreground text-xs">
+          Created by{" "}
+          <a
+            className="underline hover:text-foreground"
+            href="https://matthewblode.com"
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            Matthew Blode
+          </a>
+        </p>
       </DialogContent>
     </Dialog>
   );

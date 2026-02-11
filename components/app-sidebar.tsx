@@ -3,7 +3,6 @@
 import { Bookmark, Heart, House, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,12 +17,14 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
+import { useKeyboardShortcutsDialog } from "@/hooks/use-keyboard-shortcuts-dialog";
 
 export const AppSidebar = () => {
   const pathname = usePathname();
-  const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const { open: shortcutsOpen, setOpen: setShortcutsOpen } =
+    useKeyboardShortcutsDialog();
 
-  const isHome = pathname === "/" || pathname.startsWith("/post/");
+  const isHome = pathname === "/";
   const isLikes = pathname === "/likes";
   const isBookmarks = pathname === "/bookmarks";
 

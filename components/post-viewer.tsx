@@ -10,7 +10,6 @@ import {
   Heart,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
 import { PostCard } from "@/components/post-card";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
@@ -138,8 +137,6 @@ export const PostViewer = ({
     [candidates]
   );
   const [currentIndex, setCurrentIndex] = useState(startIndex);
-  const [shortcutsOpen, setShortcutsOpen] = useState(false);
-
   const hasNavigated = useRef(false);
   const nextPageRef = useRef(2);
   const loadingRef = useRef(false);
@@ -333,7 +330,6 @@ export const PostViewer = ({
     onPrevious: handlePrevious,
     onLike: handleLike,
     onBookmark: handleBookmark,
-    onToggleShortcuts: () => setShortcutsOpen((prev) => !prev),
     onFocusSearch: () => {
       const input = document.querySelector<HTMLInputElement>(
         'input[type="search"]'
@@ -514,10 +510,6 @@ export const PostViewer = ({
           <ChevronRight aria-hidden="true" className="size-4" />
         </Button>
       </div>
-      <KeyboardShortcutsDialog
-        onOpenChange={setShortcutsOpen}
-        open={shortcutsOpen}
-      />
     </>
   );
 };

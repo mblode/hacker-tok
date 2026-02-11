@@ -7,7 +7,6 @@ interface KeyboardHandlers {
   onPrevious: () => void;
   onLike: () => void;
   onBookmark: () => void;
-  onToggleShortcuts?: () => void;
   onFocusSearch?: () => void;
 }
 
@@ -16,12 +15,6 @@ const IGNORED_TAGS = new Set(["INPUT", "TEXTAREA", "SELECT"]);
 export const useKeyboardNavigation = (handlers: KeyboardHandlers): void => {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent): void => {
-      if (event.metaKey && event.key === "/") {
-        event.preventDefault();
-        handlers.onToggleShortcuts?.();
-        return;
-      }
-
       const tag = document.activeElement?.tagName;
       if (tag && IGNORED_TAGS.has(tag)) {
         return;

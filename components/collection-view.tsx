@@ -285,7 +285,7 @@ const CollectionItem = ({
           {domain && (
             <>
               <a
-                className="hover:underline"
+                className="transition-colors hover:text-foreground hover:underline"
                 href={story.url ?? undefined}
                 onClick={(e) => e.stopPropagation()}
                 rel="noopener noreferrer"
@@ -299,7 +299,7 @@ const CollectionItem = ({
           {story.by && (
             <>
               <a
-                className="username hover:underline"
+                className="username transition-colors hover:text-foreground hover:underline"
                 href={`https://news.ycombinator.com/user?id=${story.by}`}
                 rel="noopener noreferrer"
                 target="_blank"
@@ -312,14 +312,14 @@ const CollectionItem = ({
           <span>{timeAgo}</span>
         </div>
         <button
-          className="cursor-pointer text-left font-medium text-sm hover:underline"
+          className="cursor-pointer text-left hover:underline"
           onClick={onSelect}
           type="button"
         >
           {story.title}
         </button>
         <button
-          className="flex cursor-pointer items-center gap-x-3 pt-1 text-muted-foreground text-xs transition-colors hover:text-foreground"
+          className="flex cursor-pointer items-center gap-x-3 pt-1 text-muted-foreground text-xs transition-colors hover:text-foreground hover:underline"
           onClick={onSelect}
           type="button"
         >
