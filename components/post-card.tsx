@@ -7,6 +7,7 @@ import { relativeTime } from "@/lib/utils";
 
 interface PostCardProps {
   story: CandidateStory;
+  onLinkClick?: () => void;
 }
 
 const WWW_PREFIX = /^www\./;
@@ -22,12 +23,12 @@ const extractDomain = (url: string | null): string | null => {
   }
 };
 
-export const PostCard = ({ story }: PostCardProps) => {
+export const PostCard = ({ story, onLinkClick }: PostCardProps) => {
   const domain = extractDomain(story.url);
 
   return (
-    <div>
-      <div className="mb-4 block border-border border-b pb-4">
+    <article>
+      <div className="mb-6 block border-border border-b pb-4">
         <div className="block w-full pb-2 text-sm">
           <a
             className="username"
@@ -41,13 +42,19 @@ export const PostCard = ({ story }: PostCardProps) => {
           <span className="mr-1 inline-block text-muted-foreground text-sm">
             {relativeTime(story.time)}
           </span>
+          <Dot />
+          <span className="inline-block text-muted-foreground text-sm">
+            {story.descendants.toLocaleString()} comment
+            {story.descendants !== 1 ? "s" : ""}
+          </span>
         </div>
         <h2 className="block pb-2 text-foreground text-xl leading-[1.2]">
           {story.url ? (
             <>
               <a
-                className="mr-1 break-words pr-1 hover:underline"
+                className="post-link mr-1 break-words pr-1 hover:underline"
                 href={story.url}
+                onClick={onLinkClick}
                 rel="noopener noreferrer"
                 target="_blank"
               >
@@ -57,6 +64,7 @@ export const PostCard = ({ story }: PostCardProps) => {
                 <a
                   className="list-url align-middle text-muted-foreground text-sm hover:text-foreground hover:underline"
                   href={story.url}
+                  onClick={onLinkClick}
                   rel="noopener noreferrer"
                   target="_blank"
                 >
@@ -70,9 +78,9 @@ export const PostCard = ({ story }: PostCardProps) => {
         </h2>
       </div>
 
-      <div className="max-w-prose">
+      <div>
         <CommentThread postId={story.id} postUser={story.by} />
       </div>
-    </div>
+    </article>
   );
 };

@@ -1,7 +1,15 @@
 import { PostViewer } from "@/components/post-viewer";
-import candidates from "@/lib/candidates.json";
-import type { CandidateStory } from "@/lib/types";
+import { deduplicateStories, fetchFeed } from "@/lib/hn-live";
 
-export default function Home() {
-  return <PostViewer initialCandidates={candidates as CandidateStory[]} />;
+export const dynamic = "force-dynamic";
+
+export default async function Home() {
+  const [news, best] = await Promise.all([
+    fetchFeed("news", 1),
+    fetchFeed("best", 1),
+  ]);
+
+  const initial = deduplicateStories([...news, ...best]);
+
+  return <PostViewer initialCandidates={initial} />;
 }

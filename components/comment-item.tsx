@@ -1,72 +1,129 @@
 "use client";
 
 import DOMPurify from "dompurify";
+import { Heart } from "lucide-react";
 import { type ReactElement, useState } from "react";
 import { Dot } from "@/components/dot";
+import { Button } from "@/components/ui/button";
 import type { HNComment } from "@/lib/types";
 import { cn, relativeTime } from "@/lib/utils";
 
 interface CommentItemProps {
-  comment: HNComment;
+  user: string;
+  time: number;
+  content: string;
+  level: number;
+  comments: HNComment[];
   postUser: string;
+  id?: string | number;
 }
 
-export const CommentItem = ({ comment, postUser }: CommentItemProps) => {
+export const CommentItem = ({
+  user,
+  time,
+  content,
+  level,
+  comments,
+  postUser,
+}: CommentItemProps) => {
   const [hidden, setHidden] = useState(false);
+  const [liked, setLiked] = useState(false);
 
-  const onToggleClick = () => {
-    setHidden((prev) => !prev);
+  const toggleHidden = () => {
+    setHidden((current) => !current);
+  };
+
+  const onToggleClick = (event: React.MouseEvent) => {
+    event.stopPropagation();
+    toggleHidden();
+  };
+
+  const onToggleKeyDown = (event: React.KeyboardEvent) => {
+    if (event.key !== "Enter" && event.key !== " ") {
+      return;
+    }
+
+    event.preventDefault();
+    event.stopPropagation();
+    toggleHidden();
   };
 
   let commentLoop: ReactElement | null = null;
 
-  if (comment.comments.length > 0) {
+  if (comments.length > 0) {
     commentLoop = (
       <ul className="comment-list">
-        {comment.comments.map((child) => (
-          <CommentItem comment={child} key={child.id} postUser={postUser} />
-        ))}
+        {comments.map((ele) => {
+          return (
+            <CommentItem
+              comments={ele.comments}
+              content={ele.content}
+              id={ele.id}
+              key={ele.id}
+              level={ele.level}
+              postUser={postUser}
+              time={ele.time}
+              user={ele.user}
+            />
+          );
+        })}
       </ul>
     );
   }
 
   return (
     <li className={cn("comment-wrap", { toggled: hidden })}>
-      <div
-        className={cn("comment", { toggled: hidden })}
-        data-level={comment.level}
-      >
-        <div className={cn("comment-toggle", { toggled: hidden })}>
-          <button
-            aria-expanded={!hidden}
-            aria-label={hidden ? "Expand comment" : "Collapse comment"}
-            className="mr-1 inline-block text-muted-foreground text-xs"
-            onClick={onToggleClick}
-            type="button"
-          >
-            {hidden ? "[+]" : "[-]"}
-          </button>
+      <div className={cn("comment", { toggled: hidden })} data-level={level}>
+        <div
+          aria-expanded={!hidden}
+          className={cn("comment-toggle", { toggled: hidden })}
+          onClick={onToggleClick}
+          onKeyDown={onToggleKeyDown}
+          role="button"
+          tabIndex={0}
+        >
           <a
             className={cn("username", {
-              "text-orange-500!": comment.user === postUser,
+              "text-orange-500!": user === postUser,
             })}
-            href={`https://news.ycombinator.com/user?id=${comment.user}`}
+            href={`https://news.ycombinator.com/user?id=${user}`}
             rel="noopener noreferrer"
             target="_blank"
           >
-            {comment.user}
+            {user}
           </a>
+          {user === postUser && (
+            <span className="ml-1 text-orange-500 text-xs">OP</span>
+          )}
           <Dot />
           <span className="mr-1 inline-block text-muted-foreground">
-            {relativeTime(comment.time)}
+            {relativeTime(time)}
           </span>
+          <Button
+            aria-label="Like comment"
+            className="ml-auto min-h-9 min-w-9 cursor-pointer"
+            onClick={(e) => {
+              e.stopPropagation();
+              setLiked((prev) => !prev);
+            }}
+            size="icon-sm"
+            variant="ghost"
+          >
+            <Heart
+              className={cn(
+                "size-4",
+                liked ? "like-pop text-foreground" : "text-muted-foreground"
+              )}
+              fill={liked ? "currentColor" : "none"}
+            />
+          </Button>
         </div>
 
         {!hidden && (
           <div
             className="content"
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(comment.content),
+              __html: DOMPurify.sanitize(content),
             }}
           />
         )}

@@ -20,8 +20,8 @@ React Compiler is enabled (`babel-plugin-react-compiler`).
 - `npm run fix` — auto-fix lint/format via Ultracite
 - `npm run download-hn` — fetch HN data (`scripts/download-hn.ts`)
 - `npm run process-candidates` — process candidate stories (`scripts/process-candidates.ts`)
-
-No test runner is configured.
+- `npm run test` — run tests (Vitest)
+- `npm run test:watch` — run tests in watch mode
 
 ## Lint & Format
 

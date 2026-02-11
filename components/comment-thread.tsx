@@ -55,7 +55,7 @@ export const CommentThread = ({ postId, postUser }: CommentThreadProps) => {
 
   if (error) {
     return (
-      <div className="text-muted-foreground text-sm">
+      <div className="text-muted-foreground text-sm" role="alert">
         {error}.{" "}
         <Button onClick={retry} size="xs" variant="ghost">
           Try again
@@ -72,12 +72,18 @@ export const CommentThread = ({ postId, postUser }: CommentThreadProps) => {
 
   return (
     <>
-      <div className="mb-5 text-base text-foreground">
-        {commentsCount} comment{commentsCount !== 1 ? "s" : ""}
-      </div>
       <ul className="m-0 p-0">
         {comments.map((comment) => (
-          <CommentItem comment={comment} key={comment.id} postUser={postUser} />
+          <CommentItem
+            comments={comment.comments}
+            content={comment.content}
+            id={comment.id}
+            key={comment.id}
+            level={comment.level}
+            postUser={postUser}
+            time={comment.time}
+            user={comment.user}
+          />
         ))}
       </ul>
     </>

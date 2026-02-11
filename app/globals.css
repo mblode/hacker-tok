@@ -120,25 +120,33 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
+    font-kerning: normal;
+    font-variant-ligatures: common-ligatures contextual;
   }
 }
 
 .content {
-  @apply w-full break-words text-card-foreground;
+  @apply w-full break-words text-card-foreground leading-relaxed;
   max-width: 65ch;
 }
+
 .content p {
   @apply mb-2 break-words;
 }
+
 .content a {
   @apply underline break-words transition-colors text-foreground;
 }
+
 .content pre {
-  @apply overflow-x-auto text-justify break-words whitespace-pre-wrap;
+  @apply overflow-x-auto break-words whitespace-pre-wrap;
+  font-variant-ligatures: none;
   max-width: initial !important;
 }
+
 .content *:last-child {
   @apply mb-0;
 }
@@ -146,21 +154,23 @@
 .comment-list {
   @apply border-border p-0 m-0 border-l-[3px] pl-5 mt-6;
 }
+
 .comment-list li {
   @apply pt-0 pr-0 border-t-0;
 }
 
 .comment-wrap {
   @apply border-border list-none py-6 border-t relative;
-  content-visibility: auto;
-  contain-intrinsic-size: 0 60px;
 }
+
 .comment-wrap.toggled ul {
   @apply hidden;
 }
+
 .comment-wrap:first-child {
   @apply pt-0 border-t-0;
 }
+
 .comment-wrap:last-child {
   @apply pb-0;
 }
@@ -168,25 +178,48 @@
 .comment {
   @apply block no-underline px-3 pt-[6px] pb-2 -m-3;
 }
+
 .comment.toggled {
   @apply py-0;
 }
 
+.comment:hover {
+  @apply no-underline;
+}
+
 .comment-toggle {
-  @apply block text-left -m-[6px] p-[6px] mb-[6px] cursor-pointer transition-colors text-sm;
+  @apply flex items-center -m-[6px] p-[6px] mb-[6px] cursor-pointer transition-colors text-sm rounded-lg;
   width: calc(100% + 12px);
 }
-.comment-toggle:hover {
-  @apply bg-muted;
+
+@media (hover: hover) and (pointer: fine) {
+  .comment-toggle:hover:not(:has(button:hover)) {
+    @apply bg-muted;
+  }
 }
+
 .comment-toggle.toggled {
   @apply mb-0 transition-colors opacity-50 bg-muted;
+}
+
+.comment-toggle.toggled:hover {
+  @apply bg-muted;
+}
+
+.comment-toggle:focus-visible {
+  @apply outline-2 outline-ring/50 outline-offset-2;
 }
 
 .username {
   @apply inline-block no-underline transition-colors text-muted-foreground;
 }
-.username:hover,
+
+@media (hover: hover) and (pointer: fine) {
+  .username:hover {
+    @apply underline text-foreground;
+  }
+}
+
 .username:active {
   @apply underline text-foreground;
 }
@@ -195,12 +228,49 @@
   @apply px-4 py-6 bg-card border border-transparent shadow-xl sm:border-border sm:rounded-lg sm:px-6;
 }
 
+.post-link:visited {
+  color: oklch(0.556 0 0);
+}
+
+.dark .post-link:visited {
+  color: oklch(0.708 0 0);
+}
+
 .list-url {
   @apply inline-block overflow-hidden break-words transition-colors whitespace-nowrap text-ellipsis text-muted-foreground;
 }
-.list-url:hover,
+
+@media (hover: hover) and (pointer: fine) {
+  .list-url:hover {
+    @apply underline text-foreground;
+  }
+}
+
 .list-url:active {
   @apply underline text-foreground;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  [data-slot="button"]:active:not(:disabled) {
+    transform: scale(0.97);
+    opacity: 0.9;
+  }
+}
+
+@keyframes like-pop {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.like-pop {
+  animation: like-pop 300ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -31,7 +31,7 @@ export interface HNItem {
   comments: HNComment[];
 }
 
-export type EventType = "like" | "skip" | "dwell";
+export type EventType = "like" | "skip" | "dwell" | "click" | "navigate";
 
 export interface UserEvent {
   type: EventType;
@@ -39,4 +39,8 @@ export interface UserEvent {
   timestamp: number;
   score: number;
   dwellMs?: number;
+  by?: string;
+  domain?: string;
+  title?: string;
+  topics?: string[];
 }
