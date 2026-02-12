@@ -1,6 +1,6 @@
 "use client";
 
-import { Bookmark, Heart, House, Search } from "lucide-react";
+import { Bookmark, Heart, House, Newspaper, Search } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
@@ -32,6 +32,7 @@ export const AppSidebar = ({
   useGlobalShortcuts();
 
   const isHome = pathname === "/";
+  const isNews = pathname === "/news";
   const isLikes = pathname === "/likes";
   const isBookmarks = pathname === "/bookmarks";
 
@@ -59,6 +60,14 @@ export const AppSidebar = ({
                   <Link href="/">
                     <House fill={isHome ? "currentColor" : "none"} />
                     For you
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isNews}>
+                  <Link href="/news">
+                    <Newspaper fill={isNews ? "currentColor" : "none"} />
+                    News
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>

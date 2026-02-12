@@ -47,6 +47,10 @@ export const useGlobalShortcuts = () => {
             e.preventDefault();
             router.push("/bookmarks");
             break;
+          case "n":
+            e.preventDefault();
+            router.push("/news");
+            break;
           default:
             break;
         }

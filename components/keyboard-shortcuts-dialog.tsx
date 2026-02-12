@@ -37,8 +37,19 @@ const shortcuts = [
     section: "Go to",
     items: [
       { label: "Home", keys: ["G", "then", "H"] },
+      { label: "News", keys: ["G", "then", "N"] },
       { label: "Likes", keys: ["G", "then", "L"] },
       { label: "Bookmarks", keys: ["G", "then", "B"] },
+    ],
+  },
+  {
+    section: "News tabs",
+    items: [
+      { label: "Top", keys: ["1"] },
+      { label: "New", keys: ["2"] },
+      { label: "Show", keys: ["3"] },
+      { label: "Ask", keys: ["4"] },
+      { label: "Jobs", keys: ["5"] },
     ],
   },
   {

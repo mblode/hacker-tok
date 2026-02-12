@@ -1,3 +1,4 @@
+import { extractDomain } from "@/lib/ranking";
 import type { CandidateStory } from "@/lib/types";
 import { relativeTime } from "@/lib/utils";
 import { Dot } from "./dot";
@@ -13,9 +14,7 @@ export const StoryListItem = ({
   onSelect,
   children,
 }: StoryListItemProps) => {
-  const domain = story.url
-    ? new URL(story.url).hostname.replace("www.", "")
-    : null;
+  const domain = extractDomain(story.url) ?? null;
   const timeAgo = relativeTime(story.time);
 
   return (

@@ -1,3 +1,4 @@
+import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { DevTools } from "@/components/dev-tools";
@@ -42,10 +43,9 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: ["/opengraph-image.png"],
   },
-  manifest: "/site.webmanifest",
+  manifest: "/manifest.json",
   other: {
-    "msapplication-TileColor": "#da532c",
-    "msapplication-config": "/browserconfig.xml",
+    "apple-mobile-web-app-title": "HackerTok",
   },
 };
 
@@ -82,6 +82,7 @@ export default function RootLayout({
         <QueryProvider>{children}</QueryProvider>
         <DevTools />
       </body>
+      <GoogleAnalytics gaId="G-6PS2ZMFJVC" />
     </html>
   );
 }

@@ -1,22 +1,16 @@
 "use client";
 
-import { Bookmark, Heart, Loader2, Search, X } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { PostViewer } from "@/components/post-viewer";
-import { StoryListItem } from "@/components/story-list-item";
+import { StoryActionItem } from "@/components/story-action-item";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearch } from "@/hooks/use-search";
 import { useSearchHistory } from "@/hooks/use-search-history";
-import {
-  addEvent,
-  hasEventForPost,
-  removeEventsByTypeAndPost,
-} from "@/lib/events";
 import type { SearchSort } from "@/lib/hn-algolia";
-import type { CandidateStory } from "@/lib/types";
 
 const AUTO_LOAD_LIMIT = 3;
 
@@ -84,7 +78,7 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+        if (entries[0]?.isIntersecting && hasNextPage && !isFetchingNextPage) {
           setAutoLoadCount((c) => c + 1);
           fetchNextPage();
         }
@@ -220,7 +214,7 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
         {results.length > 0 && (
           <div className="mx-auto max-w-[80ch] pb-8">
             {results.map((story, index) => (
-              <SearchResultItem
+              <StoryActionItem
                 key={story.id}
                 onSelect={() => setSelectedIndex(index)}
                 story={story}
@@ -313,80 +307,5 @@ const RecentSearches = ({
         Clear history
       </button>
     </div>
-  );
-};
-
-interface SearchResultItemProps {
-  story: CandidateStory;
-  onSelect: () => void;
-}
-
-const SearchResultItem = ({ story, onSelect }: SearchResultItemProps) => {
-  const [liked, setLiked] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
-
-  useEffect(() => {
-    hasEventForPost("like", story.id).then(setLiked);
-    hasEventForPost("bookmark", story.id).then(setBookmarked);
-  }, [story.id]);
-
-  const toggleLike = async () => {
-    if (liked) {
-      await removeEventsByTypeAndPost("like", story.id);
-    } else {
-      await addEvent({
-        type: "like",
-        postId: story.id,
-        timestamp: Date.now(),
-        score: story.score,
-        by: story.by,
-        title: story.title,
-        url: story.url,
-        descendants: story.descendants,
-      });
-    }
-    setLiked((prev) => !prev);
-  };
-
-  const toggleBookmark = async () => {
-    if (bookmarked) {
-      await removeEventsByTypeAndPost("bookmark", story.id);
-    } else {
-      await addEvent({
-        type: "bookmark",
-        postId: story.id,
-        timestamp: Date.now(),
-        score: story.score,
-        by: story.by,
-        title: story.title,
-        url: story.url,
-        descendants: story.descendants,
-      });
-    }
-    setBookmarked((prev) => !prev);
-  };
-
-  return (
-    <StoryListItem onSelect={onSelect} story={story}>
-      <Button
-        aria-label={bookmarked ? "Remove bookmark" : "Bookmark"}
-        onClick={toggleBookmark}
-        size="icon-sm"
-        variant="ghost"
-      >
-        <Bookmark
-          className="size-4"
-          fill={bookmarked ? "currentColor" : "none"}
-        />
-      </Button>
-      <Button
-        aria-label={liked ? "Remove like" : "Like"}
-        onClick={toggleLike}
-        size="icon-sm"
-        variant="ghost"
-      >
-        <Heart className="size-4" fill={liked ? "currentColor" : "none"} />
-      </Button>
-    </StoryListItem>
   );
 };

@@ -5,6 +5,7 @@ import {
   Heart,
   House,
   Keyboard,
+  Newspaper,
   PanelLeft,
   Search,
 } from "lucide-react";
@@ -79,6 +80,10 @@ export const CommandMenu = ({ onOpenKeyboardShortcuts }: CommandMenuProps) => {
           <CommandItem onSelect={() => runCommand(() => router.push("/"))}>
             <House />
             For you
+          </CommandItem>
+          <CommandItem onSelect={() => runCommand(() => router.push("/news"))}>
+            <Newspaper />
+            News
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => router.push("/likes"))}>
             <Heart />

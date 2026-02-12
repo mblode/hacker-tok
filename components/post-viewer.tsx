@@ -36,6 +36,7 @@ interface PostViewerProps {
   mode?: "feed" | "collection";
   startIndex?: number;
   onBack?: () => void;
+  onLoadMore?: () => void;
   originPath?: string;
 }
 
@@ -44,6 +45,7 @@ export const PostViewer = ({
   mode = "feed",
   startIndex = 0,
   onBack,
+  onLoadMore,
   originPath,
 }: PostViewerProps) => {
   const isCollectionMode = mode === "collection";
@@ -77,6 +79,19 @@ export const PostViewer = ({
       setReady(true);
     };
     init();
+  }, [initialCandidates, isCollectionMode]);
+
+  // Sync growing candidates from parent (e.g. news feed infinite scroll)
+  useEffect(() => {
+    if (!isCollectionMode) {
+      return;
+    }
+    setCandidates((prev) => {
+      if (initialCandidates.length <= prev.length) {
+        return prev;
+      }
+      return deduplicateStories([...prev, ...initialCandidates]);
+    });
   }, [initialCandidates, isCollectionMode]);
 
   useEffect(() => {
@@ -156,6 +171,7 @@ export const PostViewer = ({
   const loadMoreIfNeeded = useCallback(
     (index: number) => {
       if (isCollectionMode) {
+        onLoadMore?.();
         return;
       }
 
@@ -173,7 +189,6 @@ export const PostViewer = ({
 
       fetchFeed("news", page).then(async (stories) => {
         if (stories.length > 0) {
-          const seen = await getSeenPostIds();
           const events = await getEvents();
           setCandidates((prev) => {
             const merged = deduplicateStories([...prev, ...stories]);
@@ -181,18 +196,14 @@ export const PostViewer = ({
             if (newOnly.length === 0) {
               return prev;
             }
-            const fresh = newOnly.filter((s) => !seen.has(s.id));
-            const ranked = rankCandidates(fresh, events);
-            if (ranked.length === 0) {
-              return prev;
-            }
+            const ranked = rankCandidates(newOnly, events);
             return [...prev, ...ranked];
           });
         }
         loadingRef.current = false;
       });
     },
-    [candidates.length, isCollectionMode]
+    [candidates.length, isCollectionMode, onLoadMore]
   );
 
   const rerankFrom = async (fromIndex: number) => {
