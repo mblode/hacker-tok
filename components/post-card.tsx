@@ -1,7 +1,9 @@
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
 import { CommentThread } from "@/components/comment-thread";
 import { Dot } from "@/components/dot";
+import { fetchItem } from "@/lib/hn-api";
 import type { CandidateStory } from "@/lib/types";
 import { relativeTime } from "@/lib/utils";
 
@@ -10,6 +12,7 @@ interface PostCardProps {
   onLinkClick?: () => void;
 }
 
+const HTTP_URL = /^https?:\/\//;
 const WWW_PREFIX = /^www\./;
 
 const extractDomain = (url: string | null): string | null => {
@@ -24,7 +27,15 @@ const extractDomain = (url: string | null): string | null => {
 };
 
 export const PostCard = ({ story, onLinkClick }: PostCardProps) => {
-  const domain = extractDomain(story.url);
+  const { data: item } = useQuery({
+    queryKey: ["hn-item", story.id],
+    queryFn: () => fetchItem(story.id),
+  });
+
+  const rawUrl = item?.url || story.url;
+  const url = rawUrl && HTTP_URL.test(rawUrl) ? rawUrl : null;
+  const content = item?.content;
+  const domain = extractDomain(url);
 
   return (
     <article>
@@ -49,11 +60,11 @@ export const PostCard = ({ story, onLinkClick }: PostCardProps) => {
           </span>
         </div>
         <h2 className="block pb-2 text-foreground text-xl leading-[1.2]">
-          {story.url ? (
+          {url ? (
             <>
               <a
                 className="post-link mr-1 break-words pr-1 hover:underline"
-                href={story.url}
+                href={url}
                 onClick={onLinkClick}
                 rel="noopener noreferrer"
                 target="_blank"
@@ -63,7 +74,7 @@ export const PostCard = ({ story, onLinkClick }: PostCardProps) => {
               {domain && (
                 <a
                   className="list-url align-middle text-muted-foreground text-sm hover:text-foreground hover:underline"
-                  href={story.url}
+                  href={url}
                   onClick={onLinkClick}
                   rel="noopener noreferrer"
                   target="_blank"
@@ -73,9 +84,22 @@ export const PostCard = ({ story, onLinkClick }: PostCardProps) => {
               )}
             </>
           ) : (
-            story.title
+            <a
+              className="post-link mr-1 break-words pr-1 hover:underline"
+              href={`https://news.ycombinator.com/item?id=${story.id}`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {story.title}
+            </a>
           )}
         </h2>
+        {content && (
+          <div
+            className="content pb-2"
+            dangerouslySetInnerHTML={{ __html: content }}
+          />
+        )}
       </div>
 
       <div>

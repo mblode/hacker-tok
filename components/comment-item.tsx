@@ -160,61 +160,66 @@ export const CommentItem = ({
           role="button"
           tabIndex={0}
         >
-          <a
-            className={cn("username", {
-              "text-orange-500!": user === postUser,
-            })}
-            href={`https://news.ycombinator.com/user?id=${user}`}
-            rel="noopener noreferrer"
-            target="_blank"
-          >
-            {user}
-          </a>
-          {user === postUser && (
-            <span className="ml-1 text-orange-500 text-xs">OP</span>
-          )}
-          <Dot />
-          <span className="mr-1 inline-block text-muted-foreground">
-            {relativeTime(time)}
-          </span>
-          <Button
-            aria-label="Bookmark comment"
-            className="ml-auto min-h-9 min-w-9 cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleBookmark();
-            }}
-            size="icon-sm"
-            variant="ghost"
-          >
-            <Bookmark
-              className={cn(
-                "size-4",
-                bookmarked
-                  ? "bookmark-pop text-foreground"
-                  : "text-muted-foreground"
-              )}
-              fill={bookmarked ? "currentColor" : "none"}
-            />
-          </Button>
-          <Button
-            aria-label="Like comment"
-            className="min-h-9 min-w-9 cursor-pointer"
-            onClick={(e) => {
-              e.stopPropagation();
-              toggleLike();
-            }}
-            size="icon-sm"
-            variant="ghost"
-          >
-            <Heart
-              className={cn(
-                "size-4",
-                liked ? "like-pop text-foreground" : "text-muted-foreground"
-              )}
-              fill={liked ? "currentColor" : "none"}
-            />
-          </Button>
+          <div>
+            <a
+              className={cn("username", {
+                "text-orange-500!": user === postUser,
+              })}
+              href={`https://news.ycombinator.com/user?id=${user}`}
+              rel="noopener noreferrer"
+              target="_blank"
+            >
+              {user}
+            </a>
+            {user === postUser && (
+              <span className="ml-1 text-orange-500 text-xs">OP</span>
+            )}
+            <Dot />
+            <span className="mr-1 inline-block text-muted-foreground">
+              {relativeTime(time)}
+            </span>
+          </div>
+
+          <div className="relative -right-1.5">
+            <Button
+              aria-label="Bookmark comment"
+              className="cursor-pointer p-1.5!"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleBookmark();
+              }}
+              size="icon-sm"
+              variant="ghost"
+            >
+              <Bookmark
+                className={cn(
+                  "size-4",
+                  bookmarked
+                    ? "bookmark-pop text-foreground"
+                    : "text-muted-foreground"
+                )}
+                fill={bookmarked ? "currentColor" : "none"}
+              />
+            </Button>
+            <Button
+              aria-label="Like comment"
+              className="cursor-pointer p-1.5!"
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleLike();
+              }}
+              size="icon-sm"
+              variant="ghost"
+            >
+              <Heart
+                className={cn(
+                  "size-4",
+                  liked ? "like-pop text-foreground" : "text-muted-foreground"
+                )}
+                fill={liked ? "currentColor" : "none"}
+              />
+            </Button>
+          </div>
         </header>
 
         {!hidden && sanitizedHtml && (

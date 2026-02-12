@@ -1,6 +1,7 @@
 import type { CandidateStory } from "@/lib/types";
 
 const HN_API = "https://api.hackerwebapp.com";
+const HTTP_URL = /^https?:\/\//;
 
 interface HNApiStory {
   id: number;
@@ -17,7 +18,7 @@ interface HNApiStory {
 const toCandidate = (item: HNApiStory): CandidateStory => ({
   id: item.id,
   title: item.title,
-  url: item.url || null,
+  url: item.url && HTTP_URL.test(item.url) ? item.url : null,
   by: item.user,
   time: item.time,
   score: item.points ?? 0,

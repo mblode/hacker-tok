@@ -190,7 +190,7 @@
 }
 
 .comment-toggle {
-  @apply flex items-center -m-[6px] p-[6px] mb-[6px] cursor-pointer transition-colors text-sm rounded-lg;
+  @apply flex items-center justify-between -m-[6px] p-[6px] mb-[6px] cursor-pointer transition-colors text-sm rounded-lg;
   width: calc(100% + 12px);
 }
 
