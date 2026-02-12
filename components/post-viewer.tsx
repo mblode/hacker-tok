@@ -171,6 +171,9 @@ export const PostViewer = ({
   const loadMoreIfNeeded = useCallback(
     (index: number) => {
       if (isCollectionMode) {
+        if (index < candidates.length - LOAD_MORE_THRESHOLD) {
+          return;
+        }
         onLoadMore?.();
         return;
       }
