@@ -58,7 +58,7 @@ export const AppSidebar = ({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isHome}>
                   <Link href="/">
-                    <House fill={isHome ? "currentColor" : "none"} />
+                    <House strokeWidth={isHome ? 2.5 : 1.5} />
                     For you
                   </Link>
                 </SidebarMenuButton>
@@ -66,7 +66,7 @@ export const AppSidebar = ({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isNews}>
                   <Link href="/news">
-                    <Newspaper fill={isNews ? "currentColor" : "none"} />
+                    <Newspaper strokeWidth={isNews ? 2.5 : 1.5} />
                     News
                   </Link>
                 </SidebarMenuButton>
@@ -74,7 +74,7 @@ export const AppSidebar = ({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isLikes}>
                   <Link href="/likes">
-                    <Heart fill={isLikes ? "currentColor" : "none"} />
+                    <Heart strokeWidth={isLikes ? 2.5 : 1.5} />
                     Likes
                   </Link>
                 </SidebarMenuButton>
@@ -82,7 +82,7 @@ export const AppSidebar = ({
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isBookmarks}>
                   <Link href="/bookmarks">
-                    <Bookmark fill={isBookmarks ? "currentColor" : "none"} />
+                    <Bookmark strokeWidth={isBookmarks ? 2.5 : 1.5} />
                     Bookmarks
                   </Link>
                 </SidebarMenuButton>
