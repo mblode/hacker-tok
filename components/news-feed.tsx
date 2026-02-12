@@ -137,7 +137,7 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
     <>
       <header className="flex shrink-0 items-center gap-2 border-border border-b px-4 py-2">
         <SidebarTrigger className="md:hidden" />
-        <h1 className="font-medium text-sm">News</h1>
+        <h1 className="font-medium">News</h1>
       </header>
       <div className="shrink-0 border-border border-b px-4 py-2">
         <Tabs onValueChange={handleTabChange} value={type}>
