@@ -67,5 +67,11 @@ export default async function PostPage({ params }: PostPageProps) {
 
   const candidate = toCandidateStory(item);
   const rest = feedStories.filter((s) => s.id !== numId);
-  return <PostViewer initialCandidates={[candidate, ...rest]} originPath="/" />;
+  return (
+    <PostViewer
+      initialCandidates={[candidate, ...rest]}
+      originPath="/"
+      pinnedId={numId}
+    />
+  );
 }

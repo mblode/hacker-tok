@@ -36,6 +36,7 @@ const MAX_BACKGROUND_PAGES = 4;
 interface PostViewerProps {
   initialCandidates: CandidateStory[];
   mode?: "feed" | "collection";
+  pinnedId?: number;
   startIndex?: number;
   onBack?: () => void;
   onLoadMore?: () => void;
@@ -45,6 +46,7 @@ interface PostViewerProps {
 export const PostViewer = ({
   initialCandidates,
   mode = "feed",
+  pinnedId,
   startIndex = 0,
   onBack,
   onLoadMore,
@@ -69,7 +71,14 @@ export const PostViewer = ({
       if (!isCollectionMode) {
         const unseen = initialCandidates.filter((c) => !seen.has(c.id));
         const toRank = unseen.length > 0 ? unseen : initialCandidates;
-        setCandidates(rankCandidates(toRank, events));
+        const ranked = rankCandidates(
+          pinnedId ? toRank.filter((c) => c.id !== pinnedId) : toRank,
+          events
+        );
+        const pinned = pinnedId
+          ? initialCandidates.find((c) => c.id === pinnedId)
+          : undefined;
+        setCandidates(pinned ? [pinned, ...ranked] : ranked);
       }
 
       setLikedIds(
@@ -83,7 +92,7 @@ export const PostViewer = ({
       setReady(true);
     };
     init();
-  }, [initialCandidates, isCollectionMode]);
+  }, [initialCandidates, isCollectionMode, pinnedId]);
 
   // Sync growing candidates from parent (e.g. news feed infinite scroll)
   useEffect(() => {
