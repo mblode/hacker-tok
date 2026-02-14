@@ -1,6 +1,15 @@
 "use client";
 
-import { Bookmark, Heart, House, Newspaper, Search } from "lucide-react";
+import {
+  Bookmark,
+  Heart,
+  House,
+  LogIn,
+  LogOut,
+  Newspaper,
+  Plus,
+  Search,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
@@ -18,18 +27,24 @@ import {
   SidebarRail,
 } from "@/components/ui/sidebar";
 import { useGlobalShortcuts } from "@/hooks/use-global-shortcuts";
+import { useHnAuth } from "@/hooks/use-hn-auth";
 
 interface AppSidebarProps {
   shortcutsOpen: boolean;
   setShortcutsOpen: (open: boolean) => void;
+  onOpenLogin: () => void;
+  onOpenSubmit: () => void;
 }
 
 export const AppSidebar = ({
   shortcutsOpen,
   setShortcutsOpen,
+  onOpenLogin,
+  onOpenSubmit,
 }: AppSidebarProps) => {
   const pathname = usePathname();
   useGlobalShortcuts();
+  const { isAuthenticated, username, karma, logout } = useHnAuth();
 
   const isHome = pathname === "/";
   const isNews = pathname === "/news";
@@ -87,11 +102,55 @@ export const AppSidebar = ({
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
+              {isAuthenticated && (
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={onOpenSubmit}>
+                    <Plus />
+                    Submit
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
+        {isAuthenticated ? (
+          <div className="flex items-center gap-2 px-2 py-1.5">
+            <div className="min-w-0 flex-1">
+              <a
+                className="block truncate font-medium text-sm hover:underline"
+                href={`https://news.ycombinator.com/user?id=${username}`}
+                rel="noopener noreferrer"
+                target="_blank"
+              >
+                {username}
+              </a>
+              <div className="flex items-center gap-2">
+                <span className="text-muted-foreground text-xs">
+                  {karma?.toLocaleString()} karma
+                </span>
+                <button
+                  className="inline-flex cursor-pointer items-center gap-1 rounded-sm px-1 py-0.5 text-muted-foreground text-xs transition-colors hover:bg-sidebar-accent hover:text-foreground"
+                  onClick={logout}
+                  type="button"
+                >
+                  <LogOut aria-hidden="true" className="size-3" />
+                  Log out
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton onClick={onOpenLogin}>
+                <LogIn />
+                Log in
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        )}
         <button
           aria-label="Keyboard shortcuts"
           className="flex size-7 cursor-pointer items-center justify-center rounded-full border border-sidebar-border text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-foreground"

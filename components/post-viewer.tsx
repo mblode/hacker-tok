@@ -16,6 +16,8 @@ import { PostCard } from "@/components/post-card";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { useDwellTime } from "@/hooks/use-dwell-time";
+import { useHnAuth } from "@/hooks/use-hn-auth";
+import { useHnVote } from "@/hooks/use-hn-vote";
 import { useKeyboardNavigation } from "@/hooks/use-keyboard-navigation";
 import {
   addEvent,
@@ -49,6 +51,8 @@ export const PostViewer = ({
   originPath,
 }: PostViewerProps) => {
   const isCollectionMode = mode === "collection";
+  const { isAuthenticated } = useHnAuth();
+  const { vote } = useHnVote();
 
   const [candidates, setCandidates] =
     useState<CandidateStory[]>(initialCandidates);
@@ -301,6 +305,10 @@ export const PostViewer = ({
       await recordEvent(id, type);
       rerankFrom(currentIndex + 1);
       setIds((prev) => new Set(prev).add(id));
+
+      if (type === "like" && isAuthenticated) {
+        vote(id);
+      }
     }
   };
 
@@ -371,6 +379,15 @@ export const PostViewer = ({
     onBookmark: handleBookmark,
     onOpenLink: handleOpenLink,
     onOpenHN: handleOpenHN,
+    onReply: () => {
+      const btn = document.querySelector<HTMLButtonElement>(
+        "[data-reply-button]"
+      );
+      if (btn) {
+        btn.scrollIntoView({ behavior: "smooth", block: "center" });
+        btn.click();
+      }
+    },
     onFocusSearch: () => {
       const input = document.querySelector<HTMLInputElement>(
         'input[type="search"]'

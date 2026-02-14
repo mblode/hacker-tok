@@ -5,8 +5,11 @@ import {
   Heart,
   House,
   Keyboard,
+  LogIn,
+  LogOut,
   Newspaper,
   PanelLeft,
+  Plus,
   Search,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
@@ -22,16 +25,24 @@ import {
   CommandSeparator,
 } from "@/components/ui/command";
 import { useSidebar } from "@/components/ui/sidebar";
+import { useHnAuth } from "@/hooks/use-hn-auth";
 
 interface CommandMenuProps {
   onOpenKeyboardShortcuts?: () => void;
+  onOpenLogin?: () => void;
+  onOpenSubmit?: () => void;
 }
 
-export const CommandMenu = ({ onOpenKeyboardShortcuts }: CommandMenuProps) => {
+export const CommandMenu = ({
+  onOpenKeyboardShortcuts,
+  onOpenLogin,
+  onOpenSubmit,
+}: CommandMenuProps) => {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const router = useRouter();
   const { toggleSidebar } = useSidebar();
+  const { isAuthenticated, username, logout } = useHnAuth();
 
   useHotkeys("mod+k", () => setOpen((prev) => !prev), {
     preventDefault: true,
@@ -114,6 +125,23 @@ export const CommandMenu = ({ onOpenKeyboardShortcuts }: CommandMenuProps) => {
             <Keyboard />
             Keyboard shortcuts
           </CommandItem>
+          {isAuthenticated ? (
+            <>
+              <CommandItem onSelect={() => runCommand(() => onOpenSubmit?.())}>
+                <Plus />
+                Submit story
+              </CommandItem>
+              <CommandItem onSelect={() => runCommand(() => logout())}>
+                <LogOut />
+                Log out ({username})
+              </CommandItem>
+            </>
+          ) : (
+            <CommandItem onSelect={() => runCommand(() => onOpenLogin?.())}>
+              <LogIn />
+              Log in to Hacker News
+            </CommandItem>
+          )}
         </CommandGroup>
       </CommandList>
     </CommandDialog>

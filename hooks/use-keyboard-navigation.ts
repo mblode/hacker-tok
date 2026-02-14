@@ -10,6 +10,7 @@ interface KeyboardHandlers {
   onBookmark: () => void;
   onOpenLink?: () => void;
   onOpenHN?: () => void;
+  onReply?: () => void;
   onFocusSearch?: () => void;
 }
 
@@ -66,6 +67,15 @@ export const useKeyboardNavigation = (handlers: KeyboardHandlers): void => {
     () => {
       if (!isChordActive()) {
         handlers.onOpenHN?.();
+      }
+    },
+    options
+  );
+  useHotkeys(
+    "r",
+    () => {
+      if (!isChordActive()) {
+        handlers.onReply?.();
       }
     },
     options

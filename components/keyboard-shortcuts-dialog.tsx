@@ -31,6 +31,7 @@ const shortcuts = [
     items: [
       { label: "Like post", keys: ["L"] },
       { label: "Bookmark post", keys: ["B"] },
+      { label: "Reply to post", keys: ["R"] },
     ],
   },
   {
