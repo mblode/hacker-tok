@@ -1,12 +1,12 @@
-<svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><svg xmlns="http://www.w3.org/2000/svg" version="1.1" xmlns:xlink="http://www.w3.org/1999/xlink" width="1000" height="1000"><svg width="1000" height="1000" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g clip-path="url(#clip0_4_2)">
-<path d="M21.4727 759V241.182H162.052V443.455H348.143V241.182H488.723V759H348.143V556.727H162.052V759H21.4727ZM541.314 354.455V241.182H991.37V354.455H835.62V759H697.064V354.455H541.314Z" fill="black"></path>
-</g>
-<defs>
-<clipPath id="clip0_4_2">
-<rect width="1000" height="1000" fill="white"></rect>
-</clipPath>
-</defs>
-</svg></svg><style>@media (prefers-color-scheme: light) { :root { filter: none; } }
-@media (prefers-color-scheme: dark) { :root { filter: none; } }
-</style></svg>
+<svg width="1000" height="1000" viewBox="0 0 1000 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+<style>
+  .bg { fill: white; }
+  .text { fill: black; }
+  @media (prefers-color-scheme: dark) {
+    .bg { fill: black; }
+    .text { fill: white; }
+  }
+</style>
+<rect class="bg" width="1000" height="1000" />
+<path class="text" d="M21.4727 759V241.182H162.052V443.455H348.143V241.182H488.723V759H348.143V556.727H162.052V759H21.4727ZM541.314 354.455V241.182H991.37V354.455H835.62V759H697.064V354.455H541.314Z" />
+</svg>
