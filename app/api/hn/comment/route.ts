@@ -61,7 +61,8 @@ export async function POST(request: Request) {
     return NextResponse.json(result, {
       status: result.success ? 200 : 422,
     });
-  } catch {
+  } catch (err) {
+    console.error("[hn/comment] failed:", err);
     return NextResponse.json(
       { success: false, error: "Could not reach Hacker News." },
       { status: 502 }

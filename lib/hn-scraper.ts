@@ -1,14 +1,24 @@
 import { load } from "cheerio";
 
 const HN_BASE = "https://news.ycombinator.com";
+const FETCH_TIMEOUT_MS = 10_000;
 
 const USER_COOKIE_RE = /user=([^;]+)/;
 const AUTH_PARAM_RE = /auth=([^&]+)/;
 
 const HEADERS = {
-  "User-Agent": "HackerTok/1.0",
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
   Accept: "text/html",
 };
+
+function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+  return fetch(url, { ...init, signal: controller.signal }).finally(() =>
+    clearTimeout(timeout)
+  );
+}
 
 interface LoginResult {
   success: boolean;
@@ -36,7 +46,7 @@ export async function hnLogin(
     goto: "news",
   });
 
-  const response = await fetch(`${HN_BASE}/login`, {
+  const response = await fetchWithTimeout(`${HN_BASE}/login`, {
     method: "POST",
     headers: {
       ...HEADERS,
@@ -66,7 +76,7 @@ export async function hnLogin(
 export async function hnFetchCurrentUser(
   sessionCookie: string
 ): Promise<UserInfo | null> {
-  const response = await fetch(`${HN_BASE}/news`, {
+  const response = await fetchWithTimeout(`${HN_BASE}/news`, {
     headers: { ...HEADERS, Cookie: `user=${sessionCookie}` },
     redirect: "manual",
   });
@@ -100,7 +110,7 @@ export async function hnFetchAuthTokens(
   itemId: number,
   sessionCookie: string
 ): Promise<AuthTokens> {
-  const response = await fetch(`${HN_BASE}/item?id=${itemId}`, {
+  const response = await fetchWithTimeout(`${HN_BASE}/item?id=${itemId}`, {
     headers: { ...HEADERS, Cookie: `user=${sessionCookie}` },
   });
 
@@ -142,7 +152,7 @@ export async function hnVote(
 ): Promise<{ success: boolean }> {
   const url = `${HN_BASE}/vote?id=${itemId}&how=${direction}&auth=${auth}`;
 
-  const response = await fetch(url, {
+  const response = await fetchWithTimeout(url, {
     headers: { ...HEADERS, Cookie: `user=${sessionCookie}` },
     redirect: "manual",
   });
@@ -163,7 +173,7 @@ export async function hnPostComment(
     goto: `item?id=${parentId}`,
   });
 
-  const response = await fetch(`${HN_BASE}/comment`, {
+  const response = await fetchWithTimeout(`${HN_BASE}/comment`, {
     method: "POST",
     headers: {
       ...HEADERS,
@@ -191,7 +201,7 @@ export async function hnPostComment(
 export async function hnFetchSubmitToken(
   sessionCookie: string
 ): Promise<string | null> {
-  const response = await fetch(`${HN_BASE}/submit`, {
+  const response = await fetchWithTimeout(`${HN_BASE}/submit`, {
     headers: { ...HEADERS, Cookie: `user=${sessionCookie}` },
   });
 
@@ -226,7 +236,7 @@ export async function hnSubmitStory(
 
   const body = new URLSearchParams(params);
 
-  const response = await fetch(`${HN_BASE}/r`, {
+  const response = await fetchWithTimeout(`${HN_BASE}/r`, {
     method: "POST",
     headers: {
       ...HEADERS,

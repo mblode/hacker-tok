@@ -23,15 +23,25 @@ export async function POST(request: Request) {
     );
   }
 
+  let result: Awaited<ReturnType<typeof hnLogin>>;
   try {
-    const result = await hnLogin(body.username, body.password);
-    if (!(result.success && result.cookie)) {
-      return NextResponse.json(
-        { success: false, error: result.error },
-        { status: 401 }
-      );
-    }
+    result = await hnLogin(body.username, body.password);
+  } catch (err) {
+    console.error("[hn/login] fetch failed:", err);
+    return NextResponse.json(
+      { success: false, error: "Could not reach Hacker News." },
+      { status: 502 }
+    );
+  }
 
+  if (!(result.success && result.cookie)) {
+    return NextResponse.json(
+      { success: false, error: result.error },
+      { status: 401 }
+    );
+  }
+
+  try {
     const response = NextResponse.json({
       success: true,
       username: body.username,
@@ -39,10 +49,14 @@ export async function POST(request: Request) {
 
     setHnSession(response, result.cookie);
     return response;
-  } catch {
+  } catch (err) {
+    console.error("[hn/login] session error:", err);
     return NextResponse.json(
-      { success: false, error: "Could not reach Hacker News." },
-      { status: 502 }
+      {
+        success: false,
+        error: "Login succeeded but session could not be saved.",
+      },
+      { status: 500 }
     );
   }
 }

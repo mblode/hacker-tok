@@ -21,7 +21,8 @@ export async function GET() {
       username: user.username,
       karma: user.karma,
     });
-  } catch {
+  } catch (err) {
+    console.error("[hn/me] failed:", err);
     return NextResponse.json({ authenticated: false });
   }
 }
