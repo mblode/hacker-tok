@@ -8,10 +8,10 @@ const AUTH_TAG_LENGTH = 16;
 const COOKIE_NAME = "hn_session";
 
 function getKey(): Buffer {
-  const hex = process.env.HN_SESSION_SECRET;
+  const hex = process.env.HN_SESSION_SECRET?.trim();
   if (!hex || hex.length !== 64) {
     throw new Error(
-      "HN_SESSION_SECRET must be a 64-character hex string (32 bytes)"
+      `HN_SESSION_SECRET must be a 64-character hex string (32 bytes), got ${hex?.length ?? 0} characters`
     );
   }
   return Buffer.from(hex, "hex");
