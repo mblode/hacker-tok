@@ -2,13 +2,14 @@
 
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { PostViewer } from "@/components/post-viewer";
 import { StoryActionItem } from "@/components/story-action-item";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { isChordActive } from "@/hooks/use-global-shortcuts";
+import { useNavReset } from "@/hooks/use-nav-reset";
 import { type FeedType, useNewsFeed } from "@/hooks/use-news-feed";
 
 const FEED_TABS: { label: string; value: FeedType }[] = [
@@ -32,6 +33,8 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const previousTypeRef = useRef<FeedType | null>(null);
 
+  useNavReset(useCallback(() => setSelectedIndex(null), []));
+
   // Tab switching shortcuts (1-5) — only active in list view
   const listVisible = selectedIndex === null;
   const hotkeyOptions = { preventDefault: true, enabled: listVisible };
@@ -39,7 +42,7 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
     "1",
     () => {
       if (!isChordActive()) {
-        router.push("/news");
+        router.push("/");
       }
     },
     hotkeyOptions
@@ -48,7 +51,7 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
     "2",
     () => {
       if (!isChordActive()) {
-        router.push("/news?type=newest");
+        router.push("/?type=newest");
       }
     },
     hotkeyOptions
@@ -57,7 +60,7 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
     "3",
     () => {
       if (!isChordActive()) {
-        router.push("/news?type=show");
+        router.push("/?type=show");
       }
     },
     hotkeyOptions
@@ -66,7 +69,7 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
     "4",
     () => {
       if (!isChordActive()) {
-        router.push("/news?type=ask");
+        router.push("/?type=ask");
       }
     },
     hotkeyOptions
@@ -75,7 +78,7 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
     "5",
     () => {
       if (!isChordActive()) {
-        router.push("/news?type=jobs");
+        router.push("/?type=jobs");
       }
     },
     hotkeyOptions
@@ -111,13 +114,13 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
 
   const handleTabChange = (value: string) => {
     if (value === "news") {
-      router.push("/news");
+      router.push("/");
     } else {
-      router.push(`/news?type=${value}`);
+      router.push(`/?type=${value}`);
     }
   };
 
-  const originPath = type === "news" ? "/news" : `/news?type=${type}`;
+  const originPath = type === "news" ? "/" : `/?type=${type}`;
 
   if (selectedIndex !== null && stories.length > 0) {
     return (
@@ -138,18 +141,18 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
       <header className="flex shrink-0 items-center gap-2 border-border border-b px-4 py-2">
         <SidebarTrigger className="md:hidden" />
         <h1 className="font-medium">News</h1>
+        <div className="ml-auto">
+          <Tabs onValueChange={handleTabChange} value={type}>
+            <TabsList>
+              {FEED_TABS.map((tab) => (
+                <TabsTrigger key={tab.value} value={tab.value}>
+                  {tab.label}
+                </TabsTrigger>
+              ))}
+            </TabsList>
+          </Tabs>
+        </div>
       </header>
-      <div className="shrink-0 border-border border-b px-4 py-2">
-        <Tabs onValueChange={handleTabChange} value={type}>
-          <TabsList>
-            {FEED_TABS.map((tab) => (
-              <TabsTrigger key={tab.value} value={tab.value}>
-                {tab.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
-      </div>
       <main className="min-h-0 flex-1 overflow-y-scroll">
         {isLoading && (
           <div className="flex items-center justify-center p-8">

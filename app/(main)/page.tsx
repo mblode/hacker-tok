@@ -1,19 +1,23 @@
-import { Suspense } from "react";
-import { FeedSkeleton } from "@/components/feed-skeleton";
-import { PostViewer } from "@/components/post-viewer";
-import { fetchFeed } from "@/lib/hn-live";
+import type { Metadata } from "next";
+import { NewsFeed } from "@/components/news-feed";
+import type { FeedType } from "@/hooks/use-news-feed";
 
-export const revalidate = 60;
+export const metadata: Metadata = {
+  title: "News",
+  description: "Browse the latest Hacker News stories.",
+};
 
-export default function Home() {
-  return (
-    <Suspense fallback={<FeedSkeleton />}>
-      <Feed />
-    </Suspense>
-  );
+interface HomePageProps {
+  searchParams: Promise<{ type?: string }>;
 }
 
-async function Feed() {
-  const initial = await fetchFeed("news", 1);
-  return <PostViewer initialCandidates={initial} originPath="/" />;
+const VALID_TYPES = new Set<string>(["news", "newest", "show", "ask", "jobs"]);
+
+export default async function HomePage({ searchParams }: HomePageProps) {
+  const params = await searchParams;
+  const type: FeedType = VALID_TYPES.has(params.type ?? "")
+    ? (params.type as FeedType)
+    : "news";
+
+  return <NewsFeed type={type} />;
 }

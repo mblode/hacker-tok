@@ -3,7 +3,6 @@
 import {
   Bookmark,
   Heart,
-  House,
   Keyboard,
   LogIn,
   LogOut,
@@ -11,7 +10,9 @@ import {
   PanelLeft,
   Plus,
   Search,
+  Sparkle,
 } from "lucide-react";
+
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
@@ -89,12 +90,14 @@ export const CommandMenu = ({
         )}
         <CommandGroup heading="Navigation">
           <CommandItem onSelect={() => runCommand(() => router.push("/"))}>
-            <House />
-            For you
-          </CommandItem>
-          <CommandItem onSelect={() => runCommand(() => router.push("/news"))}>
             <Newspaper />
             News
+          </CommandItem>
+          <CommandItem
+            onSelect={() => runCommand(() => router.push("/for-you"))}
+          >
+            <Sparkle />
+            For you
           </CommandItem>
           <CommandItem onSelect={() => runCommand(() => router.push("/likes"))}>
             <Heart />

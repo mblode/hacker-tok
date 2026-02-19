@@ -3,13 +3,14 @@
 import {
   Bookmark,
   Heart,
-  House,
   LogIn,
   LogOut,
   Newspaper,
   Plus,
   Search,
+  Sparkle,
 } from "lucide-react";
+
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { KeyboardShortcutsDialog } from "@/components/keyboard-shortcuts-dialog";
@@ -28,6 +29,7 @@ import {
 } from "@/components/ui/sidebar";
 import { useGlobalShortcuts } from "@/hooks/use-global-shortcuts";
 import { useHnAuth } from "@/hooks/use-hn-auth";
+import { dispatchNavReset } from "@/hooks/use-nav-reset";
 
 interface AppSidebarProps {
   shortcutsOpen: boolean;
@@ -47,7 +49,7 @@ export const AppSidebar = ({
   const { isAuthenticated, username, karma, logout } = useHnAuth();
 
   const isHome = pathname === "/";
-  const isNews = pathname === "/news";
+  const isForYou = pathname === "/for-you";
   const isLikes = pathname === "/likes";
   const isBookmarks = pathname === "/bookmarks";
 
@@ -72,23 +74,23 @@ export const AppSidebar = ({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isHome}>
-                  <Link href="/">
-                    <House />
-                    For you
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={isNews}>
-                  <Link href="/news">
+                  <Link href="/" onClick={dispatchNavReset}>
                     <Newspaper />
                     News
                   </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
               <SidebarMenuItem>
+                <SidebarMenuButton asChild isActive={isForYou}>
+                  <Link href="/for-you" onClick={dispatchNavReset}>
+                    <Sparkle />
+                    For you
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
+              <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isLikes}>
-                  <Link href="/likes">
+                  <Link href="/likes" onClick={dispatchNavReset}>
                     <Heart />
                     Likes
                   </Link>
@@ -96,7 +98,7 @@ export const AppSidebar = ({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isBookmarks}>
-                  <Link href="/bookmarks">
+                  <Link href="/bookmarks" onClick={dispatchNavReset}>
                     <Bookmark />
                     Bookmarks
                   </Link>

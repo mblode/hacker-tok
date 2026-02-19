@@ -7,6 +7,7 @@ import { StoryListItem } from "@/components/story-list-item";
 import { Button } from "@/components/ui/button";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useNavReset } from "@/hooks/use-nav-reset";
 import {
   addEvent,
   getEventsByType,
@@ -60,6 +61,8 @@ export const CollectionView = ({
   const [likedComments, setLikedComments] = useState<LikedComment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
+
+  useNavReset(useCallback(() => setSelectedIndex(null), []));
 
   const showTabs = type === "like" || type === "bookmark";
   const commentEventType: EventType =
@@ -165,18 +168,18 @@ export const CollectionView = ({
 
   return (
     <>
-      <header className="flex shrink-0 items-center gap-2 border-border border-b px-4 py-2">
-        <SidebarTrigger className="md:hidden" />
-        <h1 className="font-medium">{title}</h1>
-      </header>
       {showTabs ? (
         <Tabs className="flex min-h-0 flex-1 flex-col" defaultValue="posts">
-          <div className="shrink-0 border-border border-b px-4 py-1.5">
-            <TabsList>
-              <TabsTrigger value="posts">Posts</TabsTrigger>
-              <TabsTrigger value="comments">Comments</TabsTrigger>
-            </TabsList>
-          </div>
+          <header className="flex shrink-0 items-center gap-2 border-border border-b px-4 py-2">
+            <SidebarTrigger className="md:hidden" />
+            <h1 className="font-medium">{title}</h1>
+            <div className="ml-auto">
+              <TabsList>
+                <TabsTrigger value="posts">Posts</TabsTrigger>
+                <TabsTrigger value="comments">Comments</TabsTrigger>
+              </TabsList>
+            </div>
+          </header>
           <TabsContent
             className="min-h-0 flex-1 overflow-y-scroll"
             value="posts"
@@ -212,7 +215,13 @@ export const CollectionView = ({
           </TabsContent>
         </Tabs>
       ) : (
-        <main className="min-h-0 flex-1 overflow-y-scroll">{postList}</main>
+        <>
+          <header className="flex shrink-0 items-center gap-2 border-border border-b px-4 py-2">
+            <SidebarTrigger className="md:hidden" />
+            <h1 className="font-medium">{title}</h1>
+          </header>
+          <main className="min-h-0 flex-1 overflow-y-scroll">{postList}</main>
+        </>
       )}
     </>
   );

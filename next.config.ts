@@ -5,6 +5,9 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "date-fns", "radix-ui"],
   },
+  redirects: async () => [
+    { source: "/news", destination: "/", permanent: true },
+  ],
 };
 
 export default nextConfig;
