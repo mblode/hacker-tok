@@ -1,7 +1,8 @@
 "use client";
 
+import DOMPurify from "dompurify";
 import { Bookmark, Heart, MessageSquare } from "lucide-react";
-import { type ReactElement, useEffect, useState } from "react";
+import { type ReactElement, useEffect, useMemo, useState } from "react";
 import { CommentReplyForm } from "@/components/comment-reply-form";
 import { Dot } from "@/components/dot";
 import { Button } from "@/components/ui/button";
@@ -41,20 +42,16 @@ export const CommentItem = ({
   const [hidden, setHidden] = useState(false);
   const [liked, setLiked] = useState(false);
   const [bookmarked, setBookmarked] = useState(false);
-  const [sanitizedHtml, setSanitizedHtml] = useState("");
   const [replying, setReplying] = useState(false);
   const { isAuthenticated, username } = useHnAuth();
   const { vote } = useHnVote();
 
   const commentId = typeof id === "string" ? Number.parseInt(id, 10) : id;
-
-  useEffect(() => {
+  const sanitizedHtml = useMemo(() => {
     if (hidden) {
-      return;
+      return "";
     }
-    import("dompurify").then(({ default: DOMPurify }) => {
-      setSanitizedHtml(DOMPurify.sanitize(content));
-    });
+    return DOMPurify.sanitize(content);
   }, [content, hidden]);
 
   useEffect(() => {

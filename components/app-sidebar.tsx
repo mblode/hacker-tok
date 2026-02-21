@@ -26,6 +26,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { useGlobalShortcuts } from "@/hooks/use-global-shortcuts";
 import { useHnAuth } from "@/hooks/use-hn-auth";
@@ -47,21 +48,33 @@ export const AppSidebar = ({
   const pathname = usePathname();
   useGlobalShortcuts();
   const { isAuthenticated, username, karma, logout } = useHnAuth();
+  const { isMobile, setOpenMobile } = useSidebar();
 
   const isHome = pathname === "/";
   const isForYou = pathname === "/for-you";
   const isLikes = pathname === "/likes";
   const isBookmarks = pathname === "/bookmarks";
 
+  const handleLinkClick = () => {
+    dispatchNavReset();
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
     <Sidebar variant="inset">
       <SidebarHeader>
         <div className="flex items-center justify-between py-1 pr-1 pl-2">
-          <Link className="font-semibold text-lg" href="/">
+          <Link
+            className="font-semibold text-lg"
+            href="/"
+            onClick={handleLinkClick}
+          >
             HackerTok
           </Link>
           <Button asChild size="icon-sm" variant="ghost">
-            <Link href="/search">
+            <Link href="/search" onClick={handleLinkClick}>
               <Search className="size-4" />
               <span className="sr-only">Search</span>
             </Link>
@@ -74,7 +87,7 @@ export const AppSidebar = ({
             <SidebarMenu>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isHome}>
-                  <Link href="/" onClick={dispatchNavReset}>
+                  <Link href="/" onClick={handleLinkClick}>
                     <Newspaper />
                     News
                   </Link>
@@ -82,7 +95,7 @@ export const AppSidebar = ({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isForYou}>
-                  <Link href="/for-you" onClick={dispatchNavReset}>
+                  <Link href="/for-you" onClick={handleLinkClick}>
                     <Sparkle />
                     For you
                   </Link>
@@ -90,7 +103,7 @@ export const AppSidebar = ({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isLikes}>
-                  <Link href="/likes" onClick={dispatchNavReset}>
+                  <Link href="/likes" onClick={handleLinkClick}>
                     <Heart />
                     Likes
                   </Link>
@@ -98,7 +111,7 @@ export const AppSidebar = ({
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton asChild isActive={isBookmarks}>
-                  <Link href="/bookmarks" onClick={dispatchNavReset}>
+                  <Link href="/bookmarks" onClick={handleLinkClick}>
                     <Bookmark />
                     Bookmarks
                   </Link>

@@ -2,7 +2,7 @@
 
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
 import { PostViewer } from "@/components/post-viewer";
 import { StoryActionItem } from "@/components/story-action-item";
@@ -11,6 +11,8 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { isChordActive } from "@/hooks/use-global-shortcuts";
 import { useNavReset } from "@/hooks/use-nav-reset";
 import { type FeedType, useNewsFeed } from "@/hooks/use-news-feed";
+import { useStoryEvents } from "@/hooks/use-story-events";
+import type { CandidateStory } from "@/lib/types";
 
 const FEED_TABS: { label: string; value: FeedType }[] = [
   { label: "Top", value: "news" },
@@ -22,13 +24,16 @@ const FEED_TABS: { label: string; value: FeedType }[] = [
 
 interface NewsFeedProps {
   type: FeedType;
+  initialStories?: CandidateStory[];
 }
 
-export const NewsFeed = ({ type }: NewsFeedProps) => {
+export const NewsFeed = ({ type, initialStories }: NewsFeedProps) => {
   const router = useRouter();
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const { stories, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
-    useNewsFeed({ type });
+    useNewsFeed({ type, initialStories });
+  const storyIds = useMemo(() => stories.map((story) => story.id), [stories]);
+  const { likedPostIds, bookmarkedPostIds } = useStoryEvents(storyIds);
 
   const sentinelRef = useRef<HTMLDivElement>(null);
   const previousTypeRef = useRef<FeedType | null>(null);
@@ -170,6 +175,8 @@ export const NewsFeed = ({ type }: NewsFeedProps) => {
           <div className="mx-auto max-w-[80ch] pb-8">
             {stories.map((story, index) => (
               <StoryActionItem
+                initialBookmarked={bookmarkedPostIds.has(story.id)}
+                initialLiked={likedPostIds.has(story.id)}
                 key={story.id}
                 onSelect={() => setSelectedIndex(index)}
                 story={story}

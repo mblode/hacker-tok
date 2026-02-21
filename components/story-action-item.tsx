@@ -4,26 +4,32 @@ import { Bookmark, Heart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { StoryListItem } from "@/components/story-list-item";
 import { Button } from "@/components/ui/button";
-import {
-  addEvent,
-  hasEventForPost,
-  removeEventsByTypeAndPost,
-} from "@/lib/events";
+import { addEvent, removeEventsByTypeAndPost } from "@/lib/events";
 import type { CandidateStory } from "@/lib/types";
 
 interface StoryActionItemProps {
   story: CandidateStory;
   onSelect: () => void;
+  initialLiked?: boolean;
+  initialBookmarked?: boolean;
 }
 
-export const StoryActionItem = ({ story, onSelect }: StoryActionItemProps) => {
-  const [liked, setLiked] = useState(false);
-  const [bookmarked, setBookmarked] = useState(false);
+export const StoryActionItem = ({
+  story,
+  onSelect,
+  initialLiked = false,
+  initialBookmarked = false,
+}: StoryActionItemProps) => {
+  const [liked, setLiked] = useState(initialLiked);
+  const [bookmarked, setBookmarked] = useState(initialBookmarked);
 
   useEffect(() => {
-    hasEventForPost("like", story.id).then(setLiked);
-    hasEventForPost("bookmark", story.id).then(setBookmarked);
-  }, [story.id]);
+    setLiked(initialLiked);
+  }, [initialLiked]);
+
+  useEffect(() => {
+    setBookmarked(initialBookmarked);
+  }, [initialBookmarked]);
 
   const toggleLike = async () => {
     if (liked) {

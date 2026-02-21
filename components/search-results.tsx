@@ -2,7 +2,7 @@
 
 import { Loader2, Search, X } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { PostViewer } from "@/components/post-viewer";
 import { StoryActionItem } from "@/components/story-action-item";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useSearch } from "@/hooks/use-search";
 import { useSearchHistory } from "@/hooks/use-search-history";
+import { useStoryEvents } from "@/hooks/use-story-events";
 import type { SearchSort } from "@/lib/hn-algolia";
 
 const AUTO_LOAD_LIMIT = 3;
@@ -29,6 +30,11 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
 
   const { results, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } =
     useSearch({ query, sort, enabled: query.length > 0 });
+  const resultIds = useMemo(
+    () => results.map((result) => result.id),
+    [results]
+  );
+  const { likedPostIds, bookmarkedPostIds } = useStoryEvents(resultIds);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -159,7 +165,7 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
         >
           <Search className="size-4 shrink-0 text-muted-foreground" />
           <input
-            className="h-8 w-full min-w-0 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+            className="h-8 w-full min-w-0 bg-transparent text-base outline-none placeholder:text-muted-foreground md:text-sm"
             onChange={(e) => setInputValue(e.target.value)}
             placeholder="Search stories..."
             ref={inputRef}
@@ -215,6 +221,8 @@ export const SearchResults = ({ query, sort }: SearchResultsProps) => {
           <div className="mx-auto max-w-[80ch] pb-8">
             {results.map((story, index) => (
               <StoryActionItem
+                initialBookmarked={bookmarkedPostIds.has(story.id)}
+                initialLiked={likedPostIds.has(story.id)}
                 key={story.id}
                 onSelect={() => setSelectedIndex(index)}
                 story={story}

@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageSquare } from "lucide-react";
-import { useEffect, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { CommentItem } from "@/components/comment-item";
 import { CommentReplyForm } from "@/components/comment-reply-form";
 import { Button } from "@/components/ui/button";
@@ -36,29 +36,69 @@ export const CommentThread = ({
     return () => clearTimeout(timer);
   }, [isLoading]);
 
+  let topReplyContent: ReactNode = null;
   if (isLoading) {
-    if (!showSkeleton) {
-      return null;
-    }
+    topReplyContent = (
+      <div
+        aria-hidden="true"
+        className="h-9 w-36 rounded-md border border-transparent"
+      />
+    );
+  } else if (showTopReply) {
+    topReplyContent = (
+      <CommentReplyForm
+        onCancel={() => setShowTopReply(false)}
+        onSuccess={() => setShowTopReply(false)}
+        parentId={postId}
+        postId={postId}
+      />
+    );
+  } else {
+    topReplyContent = (
+      <Button
+        data-reply-button
+        onClick={() => setShowTopReply(true)}
+        size="sm"
+        variant="outline"
+      >
+        <MessageSquare className="size-4" />
+        Add a comment
+      </Button>
+    );
+  }
+
+  const topReplySlot = isAuthenticated ? (
+    <div className="mb-4">{topReplyContent}</div>
+  ) : null;
+
+  if (isLoading) {
     return (
-      <ul className="m-0 p-0">
-        {["a", "b", "c", "d"].map((id) => (
-          <li className="comment-wrap" key={id}>
-            <div className="comment">
-              <div className="comment-toggle">
-                <div className="flex items-center gap-2">
-                  <Skeleton className="h-5 w-24" />
-                  <Skeleton className="h-5 w-14" />
+      <div>
+        {topReplySlot}
+        <ul
+          aria-hidden={!showSkeleton}
+          className={`m-0 p-0 transition-opacity duration-150 ${
+            showSkeleton ? "opacity-100" : "opacity-0"
+          }`}
+        >
+          {["a", "b", "c", "d"].map((id) => (
+            <li className="comment-wrap" key={id}>
+              <div className="comment">
+                <div className="comment-toggle">
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-5 w-24" />
+                    <Skeleton className="h-5 w-14" />
+                  </div>
+                </div>
+                <div className="content">
+                  <Skeleton className="mb-2 h-6 w-full" />
+                  <Skeleton className="h-6 w-5/6" />
                 </div>
               </div>
-              <div className="content">
-                <Skeleton className="mb-2 h-6 w-full" />
-                <Skeleton className="h-6 w-5/6" />
-              </div>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      </div>
     );
   }
 
@@ -77,28 +117,7 @@ export const CommentThread = ({
 
   return (
     <div>
-      {isAuthenticated && (
-        <div className="mb-4">
-          {showTopReply ? (
-            <CommentReplyForm
-              onCancel={() => setShowTopReply(false)}
-              onSuccess={() => setShowTopReply(false)}
-              parentId={postId}
-              postId={postId}
-            />
-          ) : (
-            <Button
-              data-reply-button
-              onClick={() => setShowTopReply(true)}
-              size="sm"
-              variant="outline"
-            >
-              <MessageSquare className="size-4" />
-              Add a comment
-            </Button>
-          )}
-        </div>
-      )}
+      {topReplySlot}
 
       {comments.length === 0 ? (
         <div className="text-muted-foreground text-sm">No comments yet.</div>

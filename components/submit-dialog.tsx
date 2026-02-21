@@ -127,7 +127,7 @@ export const SubmitDialog = ({ open, onOpenChange }: SubmitDialogProps) => {
               </p>
               <textarea
                 aria-label="Text (for Ask HN / Show HN posts)"
-                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex min-h-[80px] w-full rounded-md border border-input bg-background px-3 py-2 text-base ring-ring/30 focus-visible:border-ring focus-visible:outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 md:text-sm"
                 disabled={!!url.trim()}
                 onChange={(e) => setText(e.target.value)}
                 onKeyDown={handleTextKeyDown}

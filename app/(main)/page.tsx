@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { NewsFeed } from "@/components/news-feed";
 import type { FeedType } from "@/hooks/use-news-feed";
+import { deduplicateStories, fetchFeed } from "@/lib/hn-live";
+import type { CandidateStory } from "@/lib/types";
 
 export const metadata: Metadata = {
   title: "News",
@@ -18,6 +20,13 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const type: FeedType = VALID_TYPES.has(params.type ?? "")
     ? (params.type as FeedType)
     : "news";
+  let initialStories: CandidateStory[] = [];
 
-  return <NewsFeed type={type} />;
+  try {
+    initialStories = deduplicateStories(await fetchFeed(type, 1));
+  } catch {
+    initialStories = [];
+  }
+
+  return <NewsFeed initialStories={initialStories} type={type} />;
 }

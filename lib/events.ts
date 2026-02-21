@@ -2,6 +2,17 @@ import { _db, isDbAvailable, withTimeout, withWriteTimeout } from "@/lib/db";
 import type { EventType, UserEvent } from "@/lib/types";
 
 export const SESSION_START = Date.now();
+export const EVENTS_CHANGED_EVENT = "hackertok:events-changed";
+
+const notifyEventsChanged = () => {
+  if (
+    typeof window === "undefined" ||
+    typeof window.dispatchEvent !== "function"
+  ) {
+    return;
+  }
+  window.dispatchEvent(new Event(EVENTS_CHANGED_EVENT));
+};
 
 export const getEvents = (): Promise<UserEvent[]> => {
   if (typeof window === "undefined") {
@@ -15,6 +26,7 @@ export const addEvent = async (event: Omit<UserEvent, "id">): Promise<void> => {
     return;
   }
   await withWriteTimeout(_db.events.add(event as UserEvent));
+  notifyEventsChanged();
 };
 
 export const getSeenPostIds = (): Promise<Set<number>> => {
@@ -40,6 +52,7 @@ export const removeEventsByTypeAndPost = async (
   await withWriteTimeout(
     _db.events.where("[type+postId]").equals([type, postId]).delete()
   );
+  notifyEventsChanged();
 };
 
 export const removeEventsByTypeAndComment = async (
@@ -52,6 +65,7 @@ export const removeEventsByTypeAndComment = async (
   await withWriteTimeout(
     _db.events.where("[type+commentId]").equals([type, commentId]).delete()
   );
+  notifyEventsChanged();
 };
 
 /** Get events of a specific type, sorted by timestamp descending. */
@@ -62,6 +76,29 @@ export const getEventsByType = (type: EventType): Promise<UserEvent[]> => {
   return withTimeout(
     _db.events.where("type").equals(type).reverse().sortBy("timestamp"),
     []
+  );
+};
+
+/** Get unique post IDs for a given post-level event type. */
+export const getPostEventIdsByType = (
+  type: "like" | "bookmark"
+): Promise<Set<number>> => {
+  if (typeof window === "undefined") {
+    return Promise.resolve(new Set());
+  }
+  return withTimeout(
+    _db.events
+      .where("type")
+      .equals(type)
+      .toArray()
+      .then((events) => {
+        const ids = new Set<number>();
+        for (const event of events) {
+          ids.add(event.postId);
+        }
+        return ids;
+      }),
+    new Set<number>()
   );
 };
 
