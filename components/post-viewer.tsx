@@ -173,6 +173,7 @@ export const PostViewer = ({
   );
   const [currentIndex, setCurrentIndex] = useState(startIndex);
   const hasNavigated = useRef(false);
+  const hasPushedHistoryEntry = useRef(false);
   const nextPageRef = useRef(2);
   const loadingRef = useRef(false);
 
@@ -364,10 +365,43 @@ export const PostViewer = ({
   };
 
   const handleBack = useCallback(() => {
+    if (hasPushedHistoryEntry.current) {
+      window.history.back();
+      return;
+    }
+
     if (originPath) {
       window.history.replaceState(null, "", originPath);
     }
     onBack?.();
+  }, [onBack, originPath]);
+
+  useEffect(() => {
+    if (!onBack) {
+      return;
+    }
+
+    const handlePopState = () => {
+      if (!originPath) {
+        onBack();
+        return;
+      }
+
+      const target = new URL(originPath, window.location.origin);
+      const atOriginPath =
+        window.location.pathname === target.pathname &&
+        window.location.search === target.search;
+
+      if (atOriginPath) {
+        hasPushedHistoryEntry.current = false;
+        onBack();
+      }
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
   }, [onBack, originPath]);
 
   const currentStoryId = currentStory?.id;
@@ -375,11 +409,20 @@ export const PostViewer = ({
     if (!currentStoryId) {
       return;
     }
+
+    const postPath = `/post/${currentStoryId}`;
+
+    if (onBack && originPath && !hasPushedHistoryEntry.current) {
+      window.history.pushState(null, "", postPath);
+      hasPushedHistoryEntry.current = true;
+      return;
+    }
     if (mode === "feed" && !hasNavigated.current) {
       return;
     }
-    window.history.replaceState(null, "", `/post/${currentStoryId}`);
-  }, [currentStoryId, mode]);
+
+    window.history.replaceState(null, "", postPath);
+  }, [currentStoryId, mode, onBack, originPath]);
 
   useKeyboardNavigation({
     onNext: handleNext,
