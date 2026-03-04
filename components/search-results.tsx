@@ -285,26 +285,32 @@ const RecentSearches = ({
         </h2>
       </div>
       {searches.map((query) => (
-        <button
-          className="flex w-full cursor-pointer items-center gap-3 rounded-md px-4 py-3 text-left text-sm hover:bg-accent"
+        <div
+          className="flex items-center rounded-md hover:bg-accent"
           key={query}
-          onClick={() => onSelect(query)}
-          type="button"
         >
-          <Search className="size-4 shrink-0 text-muted-foreground" />
-          <span className="flex-1">{query}</span>
+          <a
+            className="flex flex-1 cursor-pointer items-center gap-3 px-4 py-3 text-sm"
+            href={`/search?q=${encodeURIComponent(query)}`}
+            onClick={(e) => {
+              if (!(e.metaKey || e.ctrlKey)) {
+                e.preventDefault();
+                onSelect(query);
+              }
+            }}
+          >
+            <Search className="size-4 shrink-0 text-muted-foreground" />
+            <span className="flex-1">{query}</span>
+          </a>
           <button
             aria-label={`Remove "${query}" from recent searches`}
-            className="shrink-0 cursor-pointer rounded-sm p-1 text-muted-foreground hover:text-foreground"
-            onClick={(e) => {
-              e.stopPropagation();
-              onRemove(query);
-            }}
+            className="mr-3 shrink-0 cursor-pointer rounded-sm p-1 text-muted-foreground hover:text-foreground"
+            onClick={() => onRemove(query)}
             type="button"
           >
             <X className="size-3.5" />
           </button>
-        </button>
+        </div>
       ))}
       <button
         className="flex cursor-pointer items-center gap-3 px-4 py-3 text-muted-foreground text-sm hover:text-foreground"

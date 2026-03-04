@@ -17,6 +17,13 @@ export const StoryListItem = ({
   const domain = extractDomain(story.url) ?? null;
   const timeAgo = relativeTime(story.time);
 
+  const handleClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    if (!(e.metaKey || e.ctrlKey)) {
+      e.preventDefault();
+      onSelect();
+    }
+  };
+
   return (
     <div className="mx-4 flex items-start gap-3 border-border border-b py-3">
       <div className="min-w-0 flex-1">
@@ -50,25 +57,27 @@ export const StoryListItem = ({
           )}
           <span>{timeAgo}</span>
         </div>
-        <button
-          className="cursor-pointer text-left hover:underline"
-          onClick={onSelect}
-          type="button"
+        <a
+          className="block cursor-pointer hover:underline"
+          href={`/post/${story.id}`}
+          onClick={handleClick}
         >
           {story.title}
-        </button>
-        <button
-          className="flex cursor-pointer items-center gap-x-3 pt-1 text-muted-foreground text-xs transition-colors hover:text-foreground hover:underline"
-          onClick={onSelect}
-          type="button"
-        >
-          {story.score > 0 && (
-            <span>{story.score.toLocaleString()} points</span>
-          )}
-          {story.descendants > 0 && (
-            <span>{story.descendants.toLocaleString()} comments</span>
-          )}
-        </button>
+        </a>
+        {(story.score > 0 || story.descendants > 0) && (
+          <a
+            className="flex cursor-pointer items-center gap-x-3 pt-1 text-muted-foreground text-xs transition-colors hover:text-foreground hover:underline"
+            href={`/post/${story.id}`}
+            onClick={handleClick}
+          >
+            {story.score > 0 && (
+              <span>{story.score.toLocaleString()} points</span>
+            )}
+            {story.descendants > 0 && (
+              <span>{story.descendants.toLocaleString()} comments</span>
+            )}
+          </a>
+        )}
       </div>
       {children}
     </div>
