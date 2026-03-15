@@ -43,6 +43,9 @@ export const metadata: Metadata = {
     description: SITE_DESCRIPTION,
     images: ["/opengraph-image.png"],
   },
+  verification: {
+    google: "mFwyBIbXTaKK4uF_NA0MzVWFyY40hPgBjFObg3rje04",
+  },
   manifest: "/manifest.json",
   other: {
     "apple-mobile-web-app-title": "HackerTok",
