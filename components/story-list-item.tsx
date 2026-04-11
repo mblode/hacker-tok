@@ -57,13 +57,24 @@ export const StoryListItem = ({
           )}
           <span>{timeAgo}</span>
         </div>
-        <a
-          className="block cursor-pointer hover:underline"
-          href={`/post/${story.id}`}
-          onClick={handleClick}
-        >
-          {story.title}
-        </a>
+        {story.url ? (
+          <a
+            className="block cursor-pointer hover:underline"
+            href={story.url}
+            rel="noopener noreferrer"
+            target="_blank"
+          >
+            {story.title}
+          </a>
+        ) : (
+          <a
+            className="block cursor-pointer hover:underline"
+            href={`/post/${story.id}`}
+            onClick={handleClick}
+          >
+            {story.title}
+          </a>
+        )}
         {(story.score > 0 || story.descendants > 0) && (
           <a
             className="flex cursor-pointer items-center gap-x-3 pt-1 text-muted-foreground text-xs transition-colors hover:text-foreground hover:underline"
@@ -71,7 +82,7 @@ export const StoryListItem = ({
             onClick={handleClick}
           >
             {story.score > 0 && (
-              <span>{story.score.toLocaleString()} points</span>
+              <span>{story.score.toLocaleString()} likes</span>
             )}
             {story.descendants > 0 && (
               <span>{story.descendants.toLocaleString()} comments</span>
